@@ -1,296 +1,467 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gradient Motion Studio</title>
+<title>Professional Motion Background Studio</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080a0f;color:#fff;font-family:Arial,Helvetica,sans-serif}
-.app{height:100vh;display:flex}
-.sidebar{width:330px;min-width:330px;background:#11151c;border-right:1px solid #252b35;padding:20px;overflow-y:auto}
-.logo{font-size:21px;font-weight:700}.sub{font-size:12px;color:#8993a3;margin:4px 0 20px}
-.section{margin-top:20px}.section-title{font-size:10px;font-weight:700;letter-spacing:1px;color:#8e98a8;text-transform:uppercase;margin-bottom:10px}
-label{display:flex;justify-content:space-between;font-size:11px;color:#cbd2dc;margin:9px 0 5px}
-select,input[type=number]{width:100%;background:#1a2029;border:1px solid #303846;color:#fff;border-radius:7px;padding:9px;outline:0}
-input[type=range]{width:100%;accent-color:#7c8cff}
-.colors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.color{width:100%;height:36px;border:0;padding:0;border-radius:7px;background:transparent;cursor:pointer}
-button{border:0;border-radius:8px;padding:10px 13px;color:#fff;background:#202733;cursor:pointer;font-weight:600}button:hover{background:#2b3442}.primary{width:100%;background:#5968ff}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.main{flex:1;min-width:0;display:flex;flex-direction:column}
-.topbar{height:58px;border-bottom:1px solid #252b35;display:flex;align-items:center;justify-content:space-between;padding:0 18px}
-.status{font-size:11px;color:#929baa}.preview{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:18px;background:#080a0e}
-canvas{display:block;width:min(100%,1280px);height:auto;aspect-ratio:16/9;background:#000;box-shadow:0 15px 60px rgba(0,0,0,.4)}
-.bottom{height:54px;border-top:1px solid #252b35;display:flex;align-items:center;gap:8px;padding:0 18px}.small{font-size:10px;color:#8e98a8}.seed{width:130px!important}
-@media(max-width:800px){.sidebar{width:270px;min-width:270px}}
+:root{--bg:#080a0f;--panel:#11151c;--panel2:#171c25;--line:#282f3b;--text:#f4f6fa;--muted:#8e98a8;--accent:#6876ff}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:12px Arial,Helvetica,sans-serif}
+.app{height:100vh;display:flex}.sidebar{width:345px;min-width:345px;background:var(--panel);border-right:1px solid var(--line);padding:18px 18px 30px;overflow:auto}
+.logo{font-size:20px;font-weight:700}.sub{color:var(--muted);font-size:11px;margin-top:4px}.section{margin-top:18px}.title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:9px}
+select,input[type=number]{width:100%;background:var(--panel2);border:1px solid #303846;color:#fff;border-radius:7px;padding:9px;outline:0}
+input[type=range]{width:100%;accent-color:var(--accent)}label{display:flex;justify-content:space-between;color:#cbd2dc;font-size:11px;margin:9px 0 5px}.val{color:#fff}
+.colors{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.color{width:100%;height:34px;padding:0;border:0;border-radius:6px;background:transparent}
+button{border:0;border-radius:7px;background:#202733;color:#fff;padding:9px 11px;font-weight:600;cursor:pointer}button:hover{background:#2b3442}.primary{width:100%;background:var(--accent)}.row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}.top{height:56px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 17px}
+.status{font-size:10px;color:var(--muted)}.preview{flex:1;display:flex;align-items:center;justify-content:center;padding:14px;background:#06080c}
+.stage{position:relative;width:min(100%,1280px);aspect-ratio:16/9;background:#000;box-shadow:0 18px 65px rgba(0,0,0,.5)}
+canvas{width:100%;height:100%;display:block}.clean{position:absolute;right:10px;bottom:10px;opacity:0;transition:opacity .15s}.stage:hover .clean{opacity:.65}.clean:hover{opacity:1}
+.bottom{height:52px;border-top:1px solid var(--line);display:flex;align-items:center;gap:7px;padding:0 15px}.seed{width:135px!important}.small{font-size:10px;color:var(--muted)}
+.group{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 </style>
 </head>
 <body>
 <div class="app">
 <aside class="sidebar">
-<div class="logo">Gradient Motion Studio</div>
-<div class="sub">Smooth procedural motion backgrounds</div>
+<div class="logo">Motion Background Studio</div>
+<div class="sub">Professional procedural backgrounds • screen-recording ready</div>
 
-<div class="section">
-<div class="section-title">Background Type</div>
+<div class="section"><div class="title">Background Category</div>
 <select id="style">
-<option value="liquid">Liquid Flow</option><option value="silk">Silk Waves</option>
-<option value="waves">Flowing Waves</option><option value="ribbon">Fluid Ribbons</option>
-<option value="aurora">Aurora</option><option value="plasma">Plasma</option>
-<option value="nebula">Nebula</option><option value="smoke">Smoke</option>
-<option value="clouds">Clouds</option><option value="cosmic">Cosmic Glow</option>
-<option value="vortex">Vortex</option><option value="spiral">Spiral</option>
-<option value="rings">Soft Rings</option><option value="tunnel">Tunnel</option>
-<option value="warp">Warp Space</option><option value="organic">Organic Blobs</option>
-<option value="marble">Digital Marble</option><option value="lava">Lava Flow</option>
-<option value="water">Water Flow</option><option value="sand">Soft Dunes</option>
-<option value="topographic">Topographic</option><option value="grid">Abstract Grid</option>
-<option value="lines">Dynamic Lines</option><option value="cells">Organic Cells</option>
-<option value="noise">Abstract Noise</option><option value="bokeh">Soft Bokeh</option>
-<option value="sunset">Soft Sunset</option><option value="folds">Light Folds</option>
-<option value="energy">Energy Flow</option><option value="particles">Flowing Particles</option>
+<option value="liquid">Liquid Flow</option>
+<option value="silk">Luxury Silk</option>
+<option value="waves">Fluid Waves</option>
+<option value="ribbon">Flowing Ribbons</option>
+<option value="aurora">Aurora</option>
+<option value="marble">Premium Marble</option>
+<option value="vortex">Vortex</option>
+<option value="spiral">Spiral Flow</option>
+<option value="rings">Ripples</option>
+<option value="topographic">Topographic Lines</option>
+<option value="tunnel">Light Tunnel</option>
+<option value="warp">Warp Grid</option>
+<option value="grid">Modern Grid</option>
+<option value="geometric">Geometric Flow</option>
+<option value="folds">Light Folds</option>
+<option value="energy">Energy Ribbons</option>
+<option value="organic">Organic Forms</option>
+<option value="cells">Soft Cells</option>
+<option value="smoke">Soft Smoke</option>
+<option value="clouds">Dreamy Clouds</option>
+<option value="nebula">Nebula</option>
+<option value="bokeh">Soft Bokeh</option>
+<option value="particles">Particles</option>
+<option value="stars">Star Field</option>
+<option value="water">Water Surface</option>
+<option value="sand">Sand Dunes</option>
+<option value="sunset">Sunset Glow</option>
+<option value="lava">Lava Flow</option>
+<option value="fire">Ember Glow</option>
+<option value="ice">Ice Light</option>
+<option value="liquidMetal">Liquid Metal</option>
 </select>
-<button class="primary" id="random" style="margin-top:9px">✦ Generate New</button>
+<button class="primary" id="random" style="margin-top:8px">✦ Generate New Background</button>
 </div>
 
-<div class="section">
-<div class="section-title">Colors</div>
+<div class="section"><div class="title">Color Palette</div>
 <div class="colors">
-<input class="color" id="c1" type="color" value="#5b4cff"><input class="color" id="c2" type="color" value="#ff4fd8">
-<input class="color" id="c3" type="color" value="#18c8ff"><input class="color" id="c4" type="color" value="#07152f">
-<input class="color" id="c5" type="color" value="#ff8a3d"><input class="color" id="c6" type="color" value="#ffffff">
+<input class="color" id="c1" type="color" value="#182848"><input class="color" id="c2" type="color" value="#4b6cb7"><input class="color" id="c3" type="color" value="#7dd3c7">
+<input class="color" id="c4" type="color" value="#0b1020"><input class="color" id="c5" type="color" value="#d7b56d"><input class="color" id="c6" type="color" value="#f3f4f6">
 </div>
-<label><span>Color Count</span><span id="colorCountVal">4</span></label>
-<input id="colorCount" type="range" min="2" max="6" value="4">
+<label><span>Color Count</span><span class="val" id="colorCountVal">4</span></label><input id="colorCount" type="range" min="2" max="6" value="4">
 </div>
 
-<div class="section">
-<div class="section-title">Motion</div>
-<label><span>Speed</span><span id="speedVal">0.50</span></label><input id="speed" type="range" min="0" max="2" step=".01" value=".5">
-<label><span>Scale</span><span id="scaleVal">1.00</span></label><input id="scale" type="range" min=".4" max="3" step=".01" value="1">
-<label><span>Distortion</span><span id="distortionVal">0.50</span></label><input id="distortion" type="range" min="0" max="2" step=".01" value=".5">
-<label><span>Frequency</span><span id="frequencyVal">2.00</span></label><input id="frequency" type="range" min=".3" max="8" step=".01" value="2">
-<label><span>Rotation</span><span id="rotationVal">0.00</span></label><input id="rotation" type="range" min="-3.14" max="3.14" step=".01" value="0">
+<div class="section"><div class="title">Motion</div>
+<label><span>Speed</span><span class="val" id="speedVal">0.50</span></label><input id="speed" type="range" min="0" max="2" step=".01" value=".5">
+<label><span>Scale</span><span class="val" id="scaleVal">1.00</span></label><input id="scale" type="range" min=".25" max="3" step=".01" value="1">
+<label><span>Distortion</span><span class="val" id="distortionVal">0.50</span></label><input id="distortion" type="range" min="0" max="2" step=".01" value=".5">
+<label><span>Frequency</span><span class="val" id="frequencyVal">2.00</span></label><input id="frequency" type="range" min=".25" max="8" step=".01" value="2">
+<label><span>Rotation</span><span class="val" id="rotationVal">0.00</span></label><input id="rotation" type="range" min="-3.14" max="3.14" step=".01" value="0">
 </div>
 
-<div class="section">
-<div class="section-title">Look</div>
-<label><span>Brightness</span><span id="brightnessVal">1.00</span></label><input id="brightness" type="range" min=".3" max="1.8" step=".01" value="1">
-<label><span>Saturation</span><span id="saturationVal">1.00</span></label><input id="saturation" type="range" min="0" max="2" step=".01" value="1">
-<label><span>Contrast</span><span id="contrastVal">1.00</span></label><input id="contrast" type="range" min=".5" max="1.8" step=".01" value="1">
-<label><span>Glow</span><span id="glowVal">0.20</span></label><input id="glow" type="range" min="0" max="1" step=".01" value=".2">
-<label><span>Softness</span><span id="softnessVal">0.50</span></label><input id="softness" type="range" min="0" max="1" step=".01" value=".5">
-<label><span>Grain</span><span id="grainVal">0.00</span></label><input id="grain" type="range" min="0" max=".08" step=".001" value="0">
-<label><span>Vignette</span><span id="vignetteVal">0.00</span></label><input id="vignette" type="range" min="0" max=".8" step=".01" value="0">
+<div class="section"><div class="title">Appearance</div>
+<label><span>Brightness</span><span class="val" id="brightnessVal">1.00</span></label><input id="brightness" type="range" min=".2" max="2" step=".01" value="1">
+<label><span>Saturation</span><span class="val" id="saturationVal">1.00</span></label><input id="saturation" type="range" min="0" max="2" step=".01" value="1">
+<label><span>Contrast</span><span class="val" id="contrastVal">1.00</span></label><input id="contrast" type="range" min=".5" max="2" step=".01" value="1">
+<label><span>Glow</span><span class="val" id="glowVal">0.25</span></label><input id="glow" type="range" min="0" max="1" step=".01" value=".25">
+<label><span>Softness</span><span class="val" id="softnessVal">0.50</span></label><input id="softness" type="range" min="0" max="1" step=".01" value=".5">
+<label><span>Grain</span><span class="val" id="grainVal">0.00</span></label><input id="grain" type="range" min="0" max=".08" step=".001" value="0">
+<label><span>Vignette</span><span class="val" id="vignetteVal">0.00</span></label><input id="vignette" type="range" min="0" max=".8" step=".01" value="0">
 </div>
 
-<div class="section">
-<div class="section-title">Variation</div>
-<div class="row"><input id="seed" class="seed" type="number" value="384721"><button id="applySeed">Apply Seed</button></div>
+<div class="section"><div class="title">Preview Quality</div>
+<select id="quality"><option value="960">Smooth — 960×540</option><option value="1280" selected>High — 1280×720</option></select>
+<div class="small" style="margin-top:6px">Use High for recording if your PC stays smooth. Switch to Smooth if FPS drops.</div>
 </div>
+
+<div class="section"><div class="title">Variation</div><div class="row"><input class="seed" id="seed" type="number" value="384721"><button id="applySeed">Apply Seed</button></div></div>
 </aside>
 
 <main class="main">
-<div class="topbar"><strong>LIVE PREVIEW</strong><div class="status" id="status">60 FPS • Live</div></div>
-<div class="preview"><canvas id="canvas" width="960" height="540"></canvas></div>
-<div class="bottom"><button id="pause">Ⅱ Pause</button><button id="random2">✦ Random</button><div style="flex:1"></div><span class="small" id="info">960 × 540 • Smooth Preview</span></div>
+<div class="top"><strong>LIVE PREVIEW</strong><div class="status" id="status">LIVE • Smooth Preview</div></div>
+<div class="preview"><div class="stage"><canvas id="canvas" width="1280" height="720"></canvas><button class="clean" id="pause">Ⅱ</button></div></div>
+<div class="bottom"><button id="random2">✦ Random</button><button id="fullscreen">⛶ Fullscreen</button><div style="flex:1"></div><span class="small" id="info">1280 × 720 • Screen Recording Ready</span></div>
 </main>
 </div>
 
 <script>
-const canvas=document.getElementById("canvas");
-const ctx=canvas.getContext("2d",{alpha:false});
-const W=canvas.width,H=canvas.height;
-let running=true, start=performance.now();
+const canvas=document.getElementById("canvas"),ctx=canvas.getContext("2d",{alpha:false});
+const P={style:"liquid",speed:.5,scale:1,distortion:.5,frequency:2,rotation:0,brightness:1,saturation:1,contrast:1,glow:.25,softness:.5,grain:0,vignette:0,colorCount:4,seed:384721};
+let running=true,last=performance.now(),elapsed=0;
 
-const p={
-style:"liquid",speed:.5,scale:1,distortion:.5,frequency:2,rotation:0,
-brightness:1,saturation:1,contrast:1,glow:.2,softness:.5,grain:0,vignette:0,
-colorCount:4,seed:384721
-};
+const categories=[...document.querySelectorAll("#style option")].map(x=>x.value);
 
-const styles=[
-"liquid","silk","waves","ribbon","aurora","plasma","nebula","smoke","clouds","cosmic",
-"vortex","spiral","rings","tunnel","warp","organic","marble","lava","water","sand",
-"topographic","grid","lines","cells","noise","bokeh","sunset","folds","energy","particles"
-];
-
-function colors(){
- let a=[];
- for(let i=1;i<=6;i++){
-  const h=document.getElementById("c"+i).value;
-  a.push(h);
+function hex(h){return [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]}
+function cols(){let a=[];for(let i=1;i<=P.colorCount;i++)a.push(hex(document.getElementById("c"+i).value));return a}
+function rgba(c,a=1){return"rgba("+c[0]+","+c[1]+","+c[2]+","+a+")"}
+function mix(a,b,t){return[a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,a[2]+(b[2]-a[2])*t]}
+function rand(n){let x=Math.sin(n*91.173+P.seed*17.731)*43758.5453;return x-Math.floor(x)}
+function clamp(x){return Math.max(0,Math.min(255,x))}
+function grade(){
+ const img=ctx.getImageData(0,0,canvas.width,canvas.height),d=img.data;
+ const sat=P.saturation,con=P.contrast,br=P.brightness;
+ for(let i=0;i<d.length;i+=4){
+  let r=d[i],g=d[i+1],b=d[i+2],l=.299*r+.587*g+.114*b;
+  r=l+(r-l)*sat;g=l+(g-l)*sat;b=l+(b-l)*sat;
+  d[i]=clamp((r-128)*con+128)*br;d[i+1]=clamp((g-128)*con+128)*br;d[i+2]=clamp((b-128)*con+128)*br;
  }
- return a.slice(0,p.colorCount);
+ ctx.putImageData(img,0,0);
 }
-function rgba(hex,a){
- const n=parseInt(hex.slice(1),16);
- return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`;
+function fillGradient(t,radial=false){
+ const c=cols(),w=canvas.width,h=canvas.height;
+ let g=radial?ctx.createRadialGradient(w*.5+Math.sin(t*.2)*w*.12,h*.5+Math.cos(t*.17)*h*.12,0,w*.5,h*.5,Math.max(w,h)*.75):ctx.createLinearGradient(0,0,w,h);
+ c.forEach((x,i)=>g.addColorStop(i/(c.length-1),rgba(x,1)));ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
 }
-function mixColor(hex,a,bg="#000000"){
- return rgba(hex,a);
+function glowBlob(x,y,r,c,a,wide=1.9){
+ const g=ctx.createRadialGradient(x,y,r*.03,x,y,r);
+ g.addColorStop(0,rgba(c,a*.52));
+ g.addColorStop(.32,rgba(c,a*.22));
+ g.addColorStop(1,rgba(c,0));
+ ctx.fillStyle=g;
+ ctx.beginPath();
+ ctx.ellipse(x,y,r*wide,r*.58,0,0,Math.PI*2);
+ ctx.fill();
 }
-function seedRand(n){
- const x=Math.sin(n*12.9898+p.seed*78.233)*43758.5453;
- return x-Math.floor(x);
-}
-function setupTransform(t){
- ctx.translate(W/2,H/2);
- ctx.rotate(p.rotation);
- ctx.scale(p.scale,p.scale);
-}
-function gradient(t,mode){
- const cs=colors();
- const x=Math.sin(t*.17)*W*.12;
- const y=Math.cos(t*.13)*H*.12;
- let g;
- if(mode==="radial"){
-  g=ctx.createRadialGradient(x,y,10,0,0,Math.max(W,H)*.75);
- }else{
-  g=ctx.createLinearGradient(-W*.6+x,-H*.5+y,W*.6-x,H*.5-y);
- }
- for(let i=0;i<cs.length;i++)g.addColorStop(i/(cs.length-1),cs[i]);
- return g;
-}
-function drawBase(t){
- ctx.fillStyle="#05070b";ctx.fillRect(0,0,W,H);
- ctx.save();setupTransform(t);
- const s=p.style, d=p.distortion, f=p.frequency;
- if(["smoke","clouds","nebula","noise"].includes(s)){
-  ctx.globalAlpha=.18+p.softness*.15;
-  for(let i=0;i<28;i++){
-   const q=seedRand(i*7.31);
-   const x=Math.sin(t*.13+i*2.7)*W*.42;
-   const y=Math.cos(t*.11+i*3.1)*H*.35;
-   const r=(40+q*140)*(1+d*.35);
-   const grd=ctx.createRadialGradient(x,y,0,x,y,r);
-   grd.addColorStop(0,rgba(colors()[i%colors().length],.9));
-   grd.addColorStop(1,rgba(colors()[(i+1)%colors().length],0));
-   ctx.fillStyle=grd;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-  }
- }else if(["vortex","spiral","tunnel"].includes(s)){
-  for(let i=0;i<9;i++){
-   const rr=70+i*80+Math.sin(t*1.1+i)*25*d;
-   ctx.globalAlpha=.14;
-   ctx.strokeStyle=colors()[i%colors().length];
-   ctx.lineWidth=18+20*p.softness;
-   ctx.beginPath();
-   for(let a=0;a<Math.PI*2+.2;a+=.08){
-    const r=rr+a*22*d;
-    const ang=a+t*(.35+i*.018)*(s==="tunnel"?-1:1);
-    const x=Math.cos(ang)*r,y=Math.sin(ang)*r;
-    if(a===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+function draw(t){
+ const w=canvas.width,h=canvas.height,c=cols(),s=P.style,d=P.distortion,f=P.frequency;
+ const T=t*P.speed;
+ ctx.globalCompositeOperation="source-over";
+ ctx.globalAlpha=1;
+ ctx.setTransform(1,0,0,1,0,0);
+ ctx.fillStyle="#05070b";ctx.fillRect(0,0,w,h);
+
+ const grad=(stops,angle=0)=>{
+   const dx=Math.cos(angle)*w,dy=Math.sin(angle)*h;
+   const g=ctx.createLinearGradient(w/2-dx,h/2-dy,w/2+dx,h/2+dy);
+   stops.forEach((q,i)=>g.addColorStop(i/(stops.length-1),rgba(q,1)));
+   return g;
+ };
+ const bg=grad(c, P.rotation*.35+.55);
+ ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+
+ // Soft professional light fields. They are large and slow, never tiny
+ // floating dots, so the result reads as a designed background.
+ const field=(x,y,rx,ry,col,a=.18,rot=0)=>{
+   const g=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));
+   g.addColorStop(0,rgba(col,a));
+   g.addColorStop(.45,rgba(col,a*.32));
+   g.addColorStop(1,rgba(col,0));
+   ctx.save();ctx.translate(x,y);ctx.rotate(rot);
+   ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.fill();ctx.restore();
+ };
+
+ // Gentle finishing wash used by most premium presets.
+ const wash=()=>{
+   ctx.globalAlpha=.16+P.softness*.10;
+   for(let i=0;i<3;i++){
+     field(
+       w*(.25+i*.25)+Math.sin(T*.12+i)*w*.08,
+       h*(.28+(i%2)*.42)+Math.cos(T*.10+i)*h*.07,
+       w*(.34+.04*i),h*(.24+.03*i),c[(i+1)%c.length],.22,P.rotation+i*.5
+     );
    }
-   ctx.stroke();
-  }
- }else if(["rings","topographic"].includes(s)){
-  for(let i=0;i<18;i++){
-   const rr=40+i*48+Math.sin(t+i)*12*d;
-   ctx.globalAlpha=.13;
-   ctx.strokeStyle=colors()[i%colors().length];
-   ctx.lineWidth=8+10*p.softness;
-   ctx.beginPath();ctx.arc(Math.sin(t*.2+i)*20,Math.cos(t*.17+i)*20,rr,0,Math.PI*2);ctx.stroke();
-  }
- }else if(["grid","lines","folds"].includes(s)){
-  ctx.globalAlpha=.16;
-  ctx.lineWidth=4+5*p.softness;
-  for(let i=-12;i<=12;i++){
-   ctx.strokeStyle=colors()[(i+20)%colors().length];
-   ctx.beginPath();
-   const off=Math.sin(t*(s==="folds"?1:.7)+i)*35*d;
-   ctx.moveTo(-W,i*75+off);ctx.lineTo(W,i*75-off);ctx.stroke();
-  }
- }else if(s==="particles"){
-  for(let i=0;i<130;i++){
-   const q=seedRand(i+1);
-   const ang=q*Math.PI*2+t*(.15+seedRand(i+22)*.5);
-   const r=(80+seedRand(i+41)*420);
-   const x=Math.cos(ang)*r,y=Math.sin(ang)*r;
-   ctx.globalAlpha=.25+seedRand(i+5)*.5;
-   ctx.fillStyle=colors()[i%colors().length];
-   ctx.beginPath();ctx.arc(x,y,1.5+seedRand(i+9)*4,0,Math.PI*2);ctx.fill();
-  }
- }else{
-  // Smooth moving layered gradients: no per-pixel CPU loop.
-  ctx.globalAlpha=1;
-  ctx.fillStyle=gradient(t,s==="cosmic"?"radial":"linear");
-  ctx.fillRect(-W,-H,W*2,H*2);
-  const cs=colors();
-  const count=6;
-  for(let i=0;i<count;i++){
-   const q=i/count;
-   const x=Math.sin(t*(.35+q*.17)+i*1.7)*W*.42;
-   const y=Math.cos(t*(.28+q*.13)+i*2.2)*H*.35;
-   const r=(180+100*Math.sin(t*.4+i))* (1+d*.35);
-   const gr=ctx.createRadialGradient(x,y,0,x,y,r);
-   gr.addColorStop(0,rgba(cs[i%cs.length],.34+p.glow*.22));
-   gr.addColorStop(1,rgba(cs[(i+1)%cs.length],0));
-   ctx.fillStyle=gr;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-  }
- }
- ctx.restore();
+   ctx.globalAlpha=1;
+ };
 
- // Global finishing effects
- if(p.vignette>0){
-  const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.18,W/2,H/2,Math.max(W,H)*.72);
-  vg.addColorStop(0,"rgba(0,0,0,0)");
-  vg.addColorStop(1,`rgba(0,0,0,${p.vignette*.55})`);
-  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+ if(s==="liquid"||s==="silk"){
+   wash();
+   ctx.save();ctx.translate(w/2,h/2);ctx.rotate(P.rotation*.45);
+   ctx.globalAlpha=.18+P.softness*.12;
+   for(let i=-8;i<=8;i++){
+     const base=i*h/11;
+     ctx.beginPath();
+     for(let x=-w;x<=w;x+=24){
+       const y=base
+        +Math.sin(x*.004*f+T*.48+i*.45)*h*.055*d
+        +Math.sin(x*.009*f-T*.22+i)*h*.022*d;
+       x===-w?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=(s==="silk"?18:12)+P.softness*20;
+     ctx.strokeStyle=rgba(c[(i+20)%c.length],.7);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="waves"){
+   ctx.save();ctx.globalAlpha=.24+P.softness*.12;
+   for(let i=0;i<13;i++){
+     ctx.beginPath();
+     for(let x=-20;x<=w+20;x+=20){
+       const y=i*h/11+
+         Math.sin(x*.006*f+T*.65+i*.42)*h*.035*d+
+         Math.sin(x*.014-T*.25)*h*.015*d;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=8+P.softness*16;
+     ctx.strokeStyle=rgba(c[i%c.length],.65);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="ribbon"||s==="folds"||s==="energy"){
+   ctx.save();ctx.translate(w/2,h/2);ctx.rotate(P.rotation);
+   for(let i=-5;i<=5;i++){
+     const col=c[(i+7)%c.length];
+     ctx.beginPath();
+     for(let x=-w;x<=w;x+=20){
+       const y=i*h*.10+
+         Math.sin(x*.0035*f+T*.42+i)*h*.10*d+
+         Math.sin(x*.008-T*.18)*h*.035*d;
+       x===-w?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=28+P.softness*35;
+     ctx.lineCap="round";
+     ctx.strokeStyle=rgba(col,.18);
+     ctx.stroke();
+     ctx.lineWidth=5+P.glow*9;
+     ctx.strokeStyle=rgba(col,.32);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="aurora"){
+   ctx.fillStyle=grad(c,-.25);ctx.fillRect(0,0,w,h);
+   ctx.save();ctx.globalCompositeOperation="screen";
+   for(let i=0;i<7;i++){
+     ctx.beginPath();
+     for(let x=-40;x<=w+40;x+=18){
+       const y=h*.15+i*h*.12+
+         Math.sin(x*.004+i+T*.22)*h*.12*d+
+         Math.sin(x*.011-T*.12)*h*.035;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=45+P.softness*55;
+     ctx.strokeStyle=rgba(c[i%c.length],.10+P.glow*.08);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="marble"){
+   ctx.fillStyle=grad(c,.8);ctx.fillRect(0,0,w,h);
+   ctx.save();ctx.globalAlpha=.28+P.softness*.12;
+   for(let i=-9;i<=9;i++){
+     ctx.beginPath();
+     for(let x=-50;x<=w+50;x+=18){
+       const y=i*h/8+
+         Math.sin(x*.007*f+T*.16+i)*h*.045*d+
+         Math.sin(x*.019*f-T*.12)*h*.018*d;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=5+P.softness*10;
+     ctx.strokeStyle=rgba(c[(i+20)%c.length],.5);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="vortex"||s==="spiral"){
+   ctx.save();ctx.translate(w/2,h/2);ctx.rotate(P.rotation);
+   for(let k=0;k<10;k++){
+     ctx.beginPath();
+     for(let a=0;a<Math.PI*5;a+=.035){
+       const r=18+a*(Math.min(w,h)/12)*(0.22+P.scale*.08);
+       const aa=a+T*(.28+k*.012)+k*.13;
+       const x=Math.cos(aa)*r,y=Math.sin(aa)*r;
+       a===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=7+P.softness*15;
+     ctx.strokeStyle=rgba(c[k%c.length],.13+P.glow*.08);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="rings"||s==="topographic"){
+   const cx=w*.5+Math.sin(T*.15)*w*.03,cy=h*.5+Math.cos(T*.12)*h*.03;
+   for(let i=0;i<18;i++){
+     const rx=40+i*Math.min(w,h)*.045, ry=rx*(.72+.18*Math.sin(i));
+     ctx.save();ctx.translate(cx,cy);ctx.rotate(P.rotation*.25);
+     ctx.lineWidth=4+P.softness*9;
+     ctx.globalAlpha=.10+P.glow*.06;
+     ctx.strokeStyle=rgba(c[i%c.length],1);
+     ctx.beginPath();ctx.ellipse(0,0,rx,ry,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+   }
+ } else if(s==="tunnel"||s==="warp"){
+   ctx.save();ctx.translate(w/2,h/2);
+   for(let i=0;i<16;i++){
+     const z=(i/16+.015+((T*.06)%1))%1;
+     const size=Math.min(w,h)*(1-z)*.9;
+     ctx.globalAlpha=.07+.08*(1-z);
+     ctx.strokeStyle=rgba(c[i%c.length],1);
+     ctx.lineWidth=3+P.glow*7;
+     ctx.beginPath();
+     if(s==="warp")ctx.rect(-size,-size*.56,size*2,size*1.12);
+     else ctx.arc(0,0,size,0,Math.PI*2);
+     ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="grid"||s==="geometric"){
+   ctx.save();ctx.translate(w/2,h/2);ctx.rotate(P.rotation);
+   const step=Math.max(55,105/f);
+   ctx.globalAlpha=.12+P.glow*.08;ctx.lineWidth=2+P.softness*3;
+   for(let x=-w;x<=w;x+=step){
+     ctx.strokeStyle=rgba(c[Math.abs(Math.round(x/step))%c.length],1);
+     ctx.beginPath();ctx.moveTo(x,-h);ctx.lineTo(x+Math.sin(T+x)*30*d,h);ctx.stroke();
+   }
+   for(let y=-h;y<=h;y+=step){
+     ctx.strokeStyle=rgba(c[Math.abs(Math.round(y/step))%c.length],1);
+     ctx.beginPath();ctx.moveTo(-w,y);ctx.lineTo(w,y+Math.cos(T+y)*30*d);ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="organic"||s==="cells"){
+   wash();
+   for(let i=0;i<15;i++){
+     const x=w*(.08+rand(i*2)*.84)+Math.sin(T*.08+i)*w*.035;
+     const y=h*(.08+rand(i*3)*.84)+Math.cos(T*.07+i)*h*.035;
+     const rx=70+rand(i*4)*150,ry=50+rand(i*5)*120;
+     field(x,y,rx,ry,c[i%c.length],.18+P.glow*.12,T*.05+i);
+   }
+ } else if(s==="smoke"||s==="clouds"||s==="nebula"){
+   ctx.fillStyle=grad(c,.2);ctx.fillRect(0,0,w,h);
+   ctx.globalCompositeOperation="screen";
+   for(let i=0;i<9;i++){
+     const x=w*(.12+rand(i*5)*.76)+Math.sin(T*.08+i)*w*.05;
+     const y=h*(.10+rand(i*7)*.80)+Math.cos(T*.07+i)*h*.05;
+     field(x,y,160+rand(i*9)*220,110+rand(i*10)*180,c[i%c.length],.10+P.glow*.10,T*.04);
+   }
+   ctx.globalCompositeOperation="source-over";
+ } else if(s==="bokeh"){
+   wash();
+   ctx.globalCompositeOperation="screen";
+   for(let i=0;i<30;i++){
+     const x=(rand(i*2)*w+Math.sin(T*.06+i)*40)%w;
+     const y=(rand(i*3)*h+Math.cos(T*.05+i)*40)%h;
+     const r=12+rand(i*4)*42;
+     field(x,y,r*2.2,r*2.2,c[i%c.length],.12+P.glow*.12);
+   }
+   ctx.globalCompositeOperation="source-over";
+ } else if(s==="particles"||s==="stars"){
+   ctx.fillStyle="#020409";ctx.fillRect(0,0,w,h);
+   for(let i=0;i<(s==="stars"?180:110);i++){
+     const a=rand(i)*Math.PI*2+T*(.015+rand(i+3)*.035);
+     const rr=rand(i+8)*Math.max(w,h)*.72;
+     const x=w/2+Math.cos(a)*rr,y=h/2+Math.sin(a)*rr;
+     ctx.globalAlpha=.18+rand(i+12)*.65;
+     ctx.fillStyle=rgba(c[i%c.length],1);
+     ctx.beginPath();ctx.arc(x,y,s==="stars"?1+rand(i+2)*1.8:1.5+rand(i+2)*2.5,0,Math.PI*2);ctx.fill();
+   }
+ } else if(s==="water"){
+   ctx.save();ctx.globalAlpha=.20+P.softness*.08;
+   for(let i=0;i<16;i++){
+     ctx.beginPath();
+     for(let x=-30;x<=w+30;x+=18){
+       const y=i*h/14+Math.sin(x*.012*f+T*.55+i)*h*.018*d;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=5+P.softness*8;ctx.strokeStyle=rgba(c[i%c.length],.55);ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="sand"){
+   ctx.save();ctx.globalAlpha=.20;
+   for(let i=-2;i<14;i++){
+     ctx.beginPath();
+     for(let x=-30;x<=w+30;x+=20){
+       const y=h*.68-i*h*.065+Math.sin(x*.006*f+T*.16+i)*h*.025*d;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=18+P.softness*18;ctx.strokeStyle=rgba(c[i%c.length],.45);ctx.stroke();
+   }
+   ctx.restore();
+ } else if(s==="sunset"){
+   const g=ctx.createLinearGradient(0,0,0,h);
+   g.addColorStop(0,rgba(c[0],1));g.addColorStop(.45,rgba(c[1%c.length],1));g.addColorStop(1,rgba(c[(c.length-1)],1));
+   ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+   field(w*.72+Math.sin(T*.08)*w*.04,h*.47,w*.17,h*.17,c[2%c.length],.42,0);
+ } else if(s==="lava"||s==="fire"){
+   ctx.fillStyle=grad(c,1.2);ctx.fillRect(0,0,w,h);
+   ctx.globalCompositeOperation="screen";
+   for(let i=0;i<12;i++)field(
+     w*(.05+rand(i*2)*.9)+Math.sin(T*.08+i)*30,
+     h*(.15+rand(i*3)*.85),
+     90+rand(i*4)*150,70+rand(i*5)*110,c[i%c.length],.12+P.glow*.1,T*.05
+   );
+   ctx.globalCompositeOperation="source-over";
+ } else if(s==="ice"){
+   ctx.fillStyle=grad(c,-.7);ctx.fillRect(0,0,w,h);
+   ctx.save();ctx.globalAlpha=.18;
+   for(let i=-3;i<10;i++){
+     ctx.beginPath();ctx.moveTo(i*w*.13,-20);
+     ctx.lineTo((i+1.8)*w*.13,h+20);
+     ctx.lineWidth=8+P.softness*15;ctx.strokeStyle=rgba(c[i%c.length],.6);ctx.stroke();
+   }ctx.restore();
+ } else if(s==="liquidMetal"){
+   ctx.fillStyle=grad(c,.65);ctx.fillRect(0,0,w,h);
+   ctx.save();ctx.globalAlpha=.24;
+   for(let i=0;i<9;i++){
+     ctx.beginPath();
+     for(let x=-30;x<w+30;x+=22){
+       const y=i*h/8+Math.sin(x*.005*f+T*.3+i)*h*.04*d;
+       x<0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+     }
+     ctx.lineWidth=22+P.softness*25;ctx.strokeStyle=rgba(c[i%c.length],.55);ctx.stroke();
+   }ctx.restore();
+ } else {
+   wash();
  }
+
+ // Clean finishing pass
+ ctx.globalAlpha=1;
+ if(P.vignette){
+   const v=ctx.createRadialGradient(w/2,h/2,Math.min(w,h)*.18,w/2,h/2,Math.max(w,h)*.76);
+   v.addColorStop(0,"rgba(0,0,0,0)");
+   v.addColorStop(1,`rgba(0,0,0,${P.vignette*.62})`);
+   ctx.fillStyle=v;ctx.fillRect(0,0,w,h);
+ }
+ if(P.grain){
+   ctx.globalAlpha=P.grain;
+   for(let i=0;i<650;i++){
+     ctx.fillStyle=rand(i+T*20)>.5?"#fff":"#000";
+     ctx.fillRect(rand(i*2)*w,rand(i*3)*h,1,1);
+   }
+ }
+ ctx.globalAlpha=1;
 }
-function render(now){
- if(running){
-  const t=(now-start)/1000*p.speed;
-  drawBase(t);
- }
- requestAnimationFrame(render);
+function loop(now){
+ if(running){elapsed=(now-last)/1000;last=now;draw((performance.now()/1000)*P.speed)}
+ requestAnimationFrame(loop);
 }
 function bind(id,key,val){
- const e=document.getElementById(id);
- e.addEventListener("input",()=>{
-  p[key]=parseFloat(e.value);
-  document.getElementById(val).textContent=p[key].toFixed(key==="grain"?3:2);
- });
+ const e=document.getElementById(id);e.oninput=()=>{P[key]=+e.value;document.getElementById(val).textContent=P[key].toFixed(key==="grain"?3:2)}
 }
-bind("speed","speed","speedVal");bind("scale","scale","scaleVal");bind("distortion","distortion","distortionVal");
-bind("frequency","frequency","frequencyVal");bind("rotation","rotation","rotationVal");
-bind("brightness","brightness","brightnessVal");bind("saturation","saturation","saturationVal");
-bind("contrast","contrast","contrastVal");bind("glow","glow","glowVal");bind("softness","softness","softnessVal");
-bind("grain","grain","grainVal");bind("vignette","vignette","vignetteVal");
-
-document.getElementById("style").addEventListener("change",e=>{
- p.style=e.target.value;document.getElementById("status").textContent="60 FPS • "+p.style;
-});
-document.getElementById("colorCount").addEventListener("input",e=>{
- p.colorCount=+e.target.value;document.getElementById("colorCountVal").textContent=p.colorCount;
-});
-document.getElementById("applySeed").onclick=()=>{
- p.seed=parseInt(document.getElementById("seed").value)||1;start=performance.now();
-};
-function randomHex(){return "#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0")}
-function randomize(){
- p.style=styles[Math.floor(Math.random()*styles.length)];
- p.speed=.2+Math.random()*1.1;p.scale=.7+Math.random()*1.4;p.distortion=Math.random()*1.5;
- p.frequency=.6+Math.random()*4.5;p.rotation=-3.14+Math.random()*6.28;
- p.brightness=.85+Math.random()*.35;p.saturation=.75+Math.random()*1.1;p.contrast=.85+Math.random()*.5;
- p.glow=Math.random()*.8;p.softness=.2+Math.random()*.8;p.grain=Math.random()*.02;p.vignette=Math.random()*.3;
- p.colorCount=2+Math.floor(Math.random()*5);p.seed=Math.floor(Math.random()*999999999);
- document.getElementById("style").value=p.style;document.getElementById("seed").value=p.seed;
- for(let i=1;i<=6;i++)document.getElementById("c"+i).value=randomHex();
- sync();start=performance.now();
-}
-function sync(){
- const ids=["speed","scale","distortion","frequency","rotation","brightness","saturation","contrast","glow","softness","grain","vignette"];
- ids.forEach(id=>{document.getElementById(id).value=p[id];document.getElementById(id+"Val").textContent=p[id].toFixed(id==="grain"?3:2)});
- document.getElementById("colorCount").value=p.colorCount;document.getElementById("colorCountVal").textContent=p.colorCount;
-}
+["speed","scale","distortion","frequency","rotation","brightness","saturation","contrast","glow","softness","grain","vignette"].forEach(x=>bind(x,x,x+"Val"));
+document.getElementById("style").onchange=e=>{P.style=e.target.value;document.getElementById("status").textContent="60 FPS • "+P.style};
+document.getElementById("colorCount").oninput=e=>{P.colorCount=+e.target.value;document.getElementById("colorCountVal").textContent=P.colorCount};
+document.getElementById("applySeed").onclick=()=>{P.seed=+(document.getElementById("seed").value)||1};
+function randomHex(){return"#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0")}
+function randomize(){P.style=categories[Math.floor(Math.random()*categories.length)];P.speed=.25+Math.random()*1.05;P.scale=.65+Math.random()*1.5;P.distortion=.15+Math.random()*1.5;P.frequency=.7+Math.random()*4.5;P.rotation=-3.14+Math.random()*6.28;P.brightness=.85+Math.random()*.3;P.saturation=.75+Math.random()*1.05;P.contrast=.85+Math.random()*.45;P.glow=Math.random()*.8;P.softness=.2+Math.random()*.8;P.grain=Math.random()*.015;P.vignette=Math.random()*.3;P.colorCount=2+Math.floor(Math.random()*5);P.seed=Math.floor(Math.random()*999999999);document.getElementById("style").value=P.style;document.getElementById("seed").value=P.seed;const palettes=[
+["#0f172a","#2563eb","#38bdf8","#14b8a6","#e2e8f0","#ffffff"],
+["#120d1f","#5b21b6","#a855f7","#ec4899","#f5d0fe","#ffffff"],
+["#07111f","#0f4c81","#2dd4bf","#93c5fd","#dbeafe","#ffffff"],
+["#21130b","#8b4513","#d97706","#f59e0b","#fde68a","#fff7ed"],
+["#111827","#374151","#6b7280","#9ca3af","#e5e7eb","#ffffff"],
+["#061a14","#047857","#10b981","#84cc16","#d9f99d","#f0fdf4"]
+];
+const pal=palettes[Math.floor(Math.random()*palettes.length)];
+pal.forEach((v,i)=>document.getElementById("c"+(i+1)).value=v);sync()}
+function sync(){const ids=["speed","scale","distortion","frequency","rotation","brightness","saturation","contrast","glow","softness","grain","vignette"];ids.forEach(id=>{document.getElementById(id).value=P[id];document.getElementById(id+"Val").textContent=P[id].toFixed(id==="grain"?3:2)});document.getElementById("colorCount").value=P.colorCount;document.getElementById("colorCountVal").textContent=P.colorCount}
 document.getElementById("random").onclick=randomize;document.getElementById("random2").onclick=randomize;
-document.getElementById("pause").onclick=()=>{
- running=!running;document.getElementById("pause").textContent=running?"Ⅱ Pause":"▶ Resume";
- if(running)start=performance.now();
-};
-sync();
-drawBase(0);
-requestAnimationFrame(render);
+document.getElementById("pause").onclick=()=>{running=!running;document.getElementById("pause").textContent=running?"Ⅱ":"▶";if(running)last=performance.now()};
+document.getElementById("fullscreen").onclick=()=>{document.querySelector(".stage").requestFullscreen?.()};
+document.getElementById("quality").onchange=e=>{const n=+e.target.value;canvas.width=n;canvas.height=n*9/16;document.getElementById("info").textContent=`${canvas.width} × ${canvas.height} • Screen Recording Ready`};
+sync();draw(0);requestAnimationFrame(loop);
 </script>
 </body>
 </html>
