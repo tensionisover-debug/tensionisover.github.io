@@ -2,1571 +2,443 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Gradient Stock Generator</title>
-
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gradient Motion Studio</title>
 <style>
 *{box-sizing:border-box}
-
-body{
-    margin:0;
-    background:#0b0d12;
-    color:#fff;
-    font-family:Arial,Helvetica,sans-serif;
-    overflow:hidden;
-}
-
-.app{
-    height:100vh;
-    display:flex;
-}
-
-.sidebar{
-    width:330px;
-    min-width:330px;
-    background:#11151c;
-    border-right:1px solid #252b35;
-    padding:20px;
-    overflow-y:auto;
-}
-
-.logo{
-    font-size:21px;
-    font-weight:700;
-    margin-bottom:4px;
-}
-
-.sub{
-    color:#8993a3;
-    font-size:12px;
-    margin-bottom:22px;
-}
-
-.section{
-    margin-top:22px;
-}
-
-.section-title{
-    font-size:11px;
-    font-weight:700;
-    color:#8e98a8;
-    text-transform:uppercase;
-    letter-spacing:1px;
-    margin-bottom:12px;
-}
-
-label{
-    display:flex;
-    justify-content:space-between;
-    font-size:12px;
-    color:#cbd2dc;
-    margin:11px 0 6px;
-}
-
-.value{
-    color:#fff;
-}
-
-select,
-input[type="number"]{
-    width:100%;
-    background:#1a2029;
-    border:1px solid #303846;
-    color:#fff;
-    border-radius:7px;
-    padding:9px;
-    outline:none;
-}
-
-input[type="range"]{
-    width:100%;
-    accent-color:#7c8cff;
-}
-
-.colors{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-}
-
-.colorBox{
-    width:100%;
-    height:40px;
-    border:0;
-    padding:0;
-    border-radius:7px;
-    background:transparent;
-    cursor:pointer;
-}
-
-button{
-    border:0;
-    border-radius:8px;
-    padding:11px 14px;
-    color:#fff;
-    background:#202733;
-    cursor:pointer;
-    font-weight:600;
-}
-
-button:hover{
-    background:#2b3442;
-}
-
-.primary{
-    width:100%;
-    background:#5968ff;
-}
-
-.primary:hover{
-    background:#6876ff;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-}
-
-.random{
-    margin-top:12px;
-}
-
-.main{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-}
-
-.topbar{
-    height:60px;
-    border-bottom:1px solid #252b35;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 18px;
-}
-
-.status{
-    font-size:12px;
-    color:#929baa;
-}
-
-.preview{
-    flex:1;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:25px;
-    background:#080a0e;
-}
-
-canvas{
-    max-width:100%;
-    max-height:100%;
-    width:auto;
-    height:auto;
-    display:block;
-    box-shadow:0 15px 60px rgba(0,0,0,.45);
-}
-
-.previewButtons{
-    position:absolute;
-    right:20px;
-    bottom:20px;
-    display:flex;
-    gap:8px;
-}
-
-.bottom{
-    height:55px;
-    border-top:1px solid #252b35;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    padding:0 18px;
-}
-
-.seedBox{
-    width:130px;
-}
-
-.small{
-    font-size:11px;
-    color:#8e98a8;
-}
-
-@media(max-width:800px){
-    .sidebar{
-        width:270px;
-        min-width:270px;
-    }
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#080a0f;color:#fff;font-family:Arial,Helvetica,sans-serif}
+.app{height:100vh;display:flex}
+.sidebar{width:320px;min-width:320px;background:#11151d;border-right:1px solid #252c38;padding:18px;overflow-y:auto}
+.logo{font-size:20px;font-weight:700}.sub{font-size:11px;color:#8993a4;margin:4px 0 20px}
+.section{margin-top:19px}.sectionTitle{font-size:10px;font-weight:700;letter-spacing:1.2px;color:#8993a4;text-transform:uppercase;margin-bottom:9px}
+label{display:flex;justify-content:space-between;font-size:11px;color:#cbd2dd;margin:9px 0 5px}
+.value{color:#fff}select,input[type=number]{width:100%;padding:8px;border-radius:7px;border:1px solid #303846;background:#1a2029;color:#fff;outline:none}
+input[type=range]{width:100%;accent-color:#6574ff}
+.colors{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.color{width:100%;height:34px;border:0;padding:0;border-radius:6px;background:transparent;cursor:pointer}
+button{border:0;border-radius:7px;padding:10px 12px;background:#202733;color:#fff;font-weight:600;cursor:pointer}
+button:hover{background:#2c3543}.primary{width:100%;background:#5c6bff}.primary:hover{background:#6c79ff}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.header{height:55px;min-height:55px;border-bottom:1px solid #252c38;display:flex;align-items:center;justify-content:space-between;padding:0 16px}
+.headerTitle{font-size:12px;font-weight:700}.status{font-size:10px;color:#929cab}
+.preview{position:relative;flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:#06080c;overflow:hidden}
+canvas{display:block;width:min(100%,1280px);height:auto;aspect-ratio:16/9;object-fit:contain;background:#000}
+.bottom{height:52px;min-height:52px;border-top:1px solid #252c38;display:flex;align-items:center;gap:7px;padding:0 14px}
+.small{font-size:10px;color:#8791a0}
+.seed{width:130px!important}
+.badge{padding:5px 8px;border-radius:5px;background:#1b222c;font-size:9px;color:#aab4c2}
+@media(max-width:760px){.sidebar{width:270px;min-width:270px}}
 </style>
 </head>
-
 <body>
-
 <div class="app">
-
 <aside class="sidebar">
+<div class="logo">Gradient Motion Studio</div>
+<div class="sub">Smooth GPU procedural backgrounds</div>
 
-    <div class="logo">Gradient Stock Generator</div>
-    <div class="sub">Procedural motion backgrounds</div>
-
-    <div class="section">
-        <div class="section-title">Style</div>
-
-        <select id="style">
-            <option value="liquid">Liquid Flow</option>
-            <option value="silk">Silk Waves</option>
-            <option value="aurora">Aurora</option>
-            <option value="vortex">Vortex</option>
-            <option value="ribbon">Fluid Ribbons</option>
-            <option value="plasma">Plasma</option>
-            <option value="organic">Organic Blobs</option>
-            <option value="rings">Soft Rings</option>
-            <option value="waves">Flowing Waves</option>
-            <option value="cosmic">Cosmic Glow</option>
-        </select>
-
-        <button class="primary random" id="randomBtn">
-            ✦ Generate New
-        </button>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Colors</div>
-
-        <div class="colors">
-            <input class="colorBox" id="c1" type="color" value="#5b4cff">
-            <input class="colorBox" id="c2" type="color" value="#ff4fd8">
-            <input class="colorBox" id="c3" type="color" value="#18c8ff">
-            <input class="colorBox" id="c4" type="color" value="#07152f">
-            <input class="colorBox" id="c5" type="color" value="#ff8a3d">
-            <input class="colorBox" id="c6" type="color" value="#ffffff">
-        </div>
-
-        <label>
-            <span>Color Count</span>
-            <span class="value" id="colorCountVal">4</span>
-        </label>
-
-        <input id="colorCount"
-               type="range"
-               min="2"
-               max="6"
-               step="1"
-               value="4">
-    </div>
-
-    <div class="section">
-        <div class="section-title">Motion</div>
-
-        <label>
-            <span>Speed</span>
-            <span class="value" id="speedVal">0.50</span>
-        </label>
-        <input id="speed" type="range" min="0" max="2" step="0.01" value="0.50">
-
-        <label>
-            <span>Scale</span>
-            <span class="value" id="scaleVal">1.00</span>
-        </label>
-        <input id="scale" type="range" min="0.25" max="3" step="0.01" value="1">
-
-        <label>
-            <span>Distortion</span>
-            <span class="value" id="distortionVal">0.50</span>
-        </label>
-        <input id="distortion" type="range" min="0" max="2" step="0.01" value="0.50">
-    </div>
-
-    <div class="section">
-        <div class="section-title">Image</div>
-
-        <label>
-            <span>Brightness</span>
-            <span class="value" id="brightnessVal">1.00</span>
-        </label>
-        <input id="brightness" type="range" min="0.2" max="2" step="0.01" value="1">
-
-        <label>
-            <span>Saturation</span>
-            <span class="value" id="saturationVal">1.00</span>
-        </label>
-        <input id="saturation" type="range" min="0" max="2" step="0.01" value="1">
-
-        <label>
-            <span>Contrast</span>
-            <span class="value" id="contrastVal">1.00</span>
-        </label>
-        <input id="contrast" type="range" min="0.5" max="2" step="0.01" value="1">
-
-        <label>
-            <span>Grain</span>
-            <span class="value" id="grainVal">0.00</span>
-        </label>
-        <input id="grain" type="range" min="0" max="0.25" step="0.001" value="0">
-    </div>
-
-
-    <div class="section">
-        <div class="section-title">Video Export</div>
-
-        <label>Resolution</label>
-        <select id="exportResolution">
-            <option value="1920x1080" selected>1920 × 1080 — Full HD</option>
-            <option value="3840x2160">3840 × 2160 — 4K</option>
-            <option value="1080x1920">1080 × 1920 — Vertical</option>
-            <option value="2160x3840">2160 × 3840 — 4K Vertical</option>
-        </select>
-
-        <label>FPS</label>
-        <select id="exportFps">
-            <option value="30">30 FPS</option>
-            <option value="60" selected>60 FPS</option>
-        </select>
-
-        <label>Duration</label>
-        <select id="exportDuration">
-            <option value="5">5 seconds</option>
-            <option value="10" selected>10 seconds</option>
-            <option value="15">15 seconds</option>
-            <option value="30">30 seconds</option>
-        </select>
-
-        <div class="row" style="margin-top:10px">
-            <button class="primary" id="exportBtn">⬇ Export WebM</button>
-            <button id="stopExportBtn">■ Stop</button>
-        </div>
-
-        <div style="margin-top:9px;height:5px;background:#202733;border-radius:20px;overflow:hidden">
-            <div id="exportProgress" style="height:100%;width:0%;background:#6977ff"></div>
-        </div>
-
-        <div class="small" id="exportStatus" style="margin-top:8px">
-            Ready to export.
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-title">Output</div>
-
-        <label>Resolution</label>
-        <select id="resolution">
-            <option value="1920x1080">1920 × 1080</option>
-            <option value="3840x2160">3840 × 2160 — 4K</option>
-            <option value="1080x1920">1080 × 1920 — Vertical</option>
-            <option value="2160x3840">2160 × 3840 — 4K Vertical</option>
-        </select>
-
-        <label>FPS</label>
-        <select id="fps">
-            <option value="30">30 FPS</option>
-            <option value="60" selected>60 FPS</option>
-        </select>
-
-        <label>Duration</label>
-        <select id="duration">
-            <option value="5">5 seconds</option>
-            <option value="10" selected>10 seconds</option>
-            <option value="15">15 seconds</option>
-            <option value="30">30 seconds</option>
-        </select>
-    </div>
-
-</aside>
-
-
-<main class="main">
-
-    <div class="topbar">
-        <div>
-            <strong>LIVE PREVIEW</strong>
-        </div>
-
-        <div class="status" id="status">
-            Ready
-        </div>
-    </div>
-
-    <div class="preview">
-
-        <canvas id="canvas" width="1280" height="720"></canvas>
-
-        <div class="previewButtons">
-            <button id="pauseBtn">Ⅱ Pause</button>
-            <button id="fullscreenBtn">⛶ Fullscreen</button>
-        </div>
-
-    </div>
-
-    <div class="bottom">
-
-        <button id="playBtn">▶ Play</button>
-
-        <span class="small">Seed:</span>
-
-        <input
-            class="seedBox"
-            id="seed"
-            type="number"
-            value="384721"
-        >
-
-        <button id="applySeed">Apply</button>
-
-        <div style="flex:1"></div>
-
-        <span class="small" id="info">
-            1280 × 720 Preview
-        </span>
-
-    </div>
-
-</main>
-
+<div class="section">
+<div class="sectionTitle">Background Type</div>
+<select id="style">
+<option value="liquid">Liquid Flow</option>
+<option value="silk">Silk / Fabric</option>
+<option value="waves">Flowing Waves</option>
+<option value="ribbons">Fluid Ribbons</option>
+<option value="smoke">Smoke</option>
+<option value="clouds">Clouds</option>
+<option value="aurora">Aurora</option>
+<option value="plasma">Plasma</option>
+<option value="nebula">Nebula</option>
+<option value="cosmic">Cosmic Glow</option>
+<option value="vortex">Vortex</option>
+<option value="spiral">Spiral</option>
+<option value="rings">Rings</option>
+<option value="tunnel">Tunnel</option>
+<option value="warp">Warp</option>
+<option value="organic">Organic Blobs</option>
+<option value="marble">Digital Marble</option>
+<option value="lava">Lava</option>
+<option value="water">Water</option>
+<option value="sand">Sand / Dunes</option>
+<option value="topographic">Topographic</option>
+<option value="grid">Abstract Grid</option>
+<option value="lines">Dynamic Lines</option>
+<option value="cells">Organic Cells</option>
+<option value="noise">Abstract Noise</option>
+<option value="bokeh">Soft Bokeh</option>
+<option value="sunset">Soft Sunset</option>
+<option value="liquid2">Deep Fluid</option>
+<option value="folds">Light Folds</option>
+<option value="energy">Energy Flow</option>
+</select>
+<button class="primary" id="random" style="margin-top:9px">✦ Generate New</button>
 </div>
 
+<div class="section">
+<div class="sectionTitle">Color Palette</div>
+<div class="colors">
+<input class="color" id="c1" type="color" value="#4f35ff">
+<input class="color" id="c2" type="color" value="#ff3dbd">
+<input class="color" id="c3" type="color" value="#20d4ff">
+<input class="color" id="c4" type="color" value="#10245c">
+<input class="color" id="c5" type="color" value="#ff7335">
+<input class="color" id="c6" type="color" value="#ffffff">
+</div>
+<label><span>Colors</span><span class="value" id="colorCountVal">4</span></label>
+<input id="colorCount" type="range" min="2" max="6" value="4">
+</div>
+
+<div class="section">
+<div class="sectionTitle">Motion</div>
+<label><span>Speed</span><span class="value" id="speedVal">0.50</span></label>
+<input id="speed" type="range" min="0.05" max="2" step=".01" value=".50">
+<label><span>Scale</span><span class="value" id="scaleVal">1.00</span></label>
+<input id="scale" type="range" min=".25" max="4" step=".01" value="1">
+<label><span>Warp</span><span class="value" id="warpVal">0.50</span></label>
+<input id="warp" type="range" min="0" max="2" step=".01" value=".50">
+<label><span>Frequency</span><span class="value" id="freqVal">2.00</span></label>
+<input id="freq" type="range" min=".25" max="8" step=".01" value="2">
+<label><span>Rotation</span><span class="value" id="rotationVal">0.00</span></label>
+<input id="rotation" type="range" min="-3.14" max="3.14" step=".01" value="0">
+</div>
+
+<div class="section">
+<div class="sectionTitle">Look</div>
+<label><span>Brightness</span><span class="value" id="brightnessVal">1.00</span></label>
+<input id="brightness" type="range" min=".3" max="1.8" step=".01" value="1">
+<label><span>Saturation</span><span class="value" id="saturationVal">1.00</span></label>
+<input id="saturation" type="range" min="0" max="2" step=".01" value="1">
+<label><span>Contrast</span><span class="value" id="contrastVal">1.00</span></label>
+<input id="contrast" type="range" min=".5" max="1.8" step=".01" value="1">
+<label><span>Softness</span><span class="value" id="softnessVal">0.50</span></label>
+<input id="softness" type="range" min="0" max="1" step=".01" value=".5">
+<label><span>Glow</span><span class="value" id="glowVal">0.20</span></label>
+<input id="glow" type="range" min="0" max="1" step=".01" value=".2">
+<label><span>Grain</span><span class="value" id="grainVal">0.00</span></label>
+<input id="grain" type="range" min="0" max=".12" step=".001" value="0">
+<label><span>Vignette</span><span class="value" id="vignetteVal">0.00</span></label>
+<input id="vignette" type="range" min="0" max=".8" step=".01" value="0">
+</div>
+
+<div class="section">
+<div class="sectionTitle">Preview Performance</div>
+<select id="quality">
+<option value="720">Performance — 960×540</option>
+<option value="1080" selected>High — 1280×720</option>
+</select>
+<div class="small" style="margin-top:7px">High is best for screen recording. Performance is smoother on weaker PCs.</div>
+</div>
+
+<div class="section">
+<div class="sectionTitle">Variation</div>
+<div class="row">
+<input id="seed" class="seed" type="number" value="384721">
+<button id="applySeed">Apply Seed</button>
+</div>
+</div>
+</aside>
+
+<main class="main">
+<div class="header">
+<div class="headerTitle">LIVE PREVIEW</div>
+<div class="status"><span class="badge">GPU</span> <span id="status">60 FPS • Live</span></div>
+</div>
+<div class="preview">
+<canvas id="canvas" width="1280" height="720"></canvas>
+</div>
+<div class="bottom">
+<button id="pause">Ⅱ Pause</button>
+<button id="random2">✦ Random</button>
+<div style="flex:1"></div>
+<span class="small" id="info">1280 × 720 • GPU</span>
+</div>
+</main>
+</div>
 
 <script>
+const canvas=document.getElementById("canvas");
+const gl=canvas.getContext("webgl",{antialias:false,alpha:false,preserveDrawingBuffer:false,powerPreference:"high-performance"})||canvas.getContext("experimental-webgl");
 
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+if(!gl){document.getElementById("status").textContent="WebGL unavailable";throw new Error("WebGL unavailable");}
 
-let running = true;
-let startTime = performance.now();
+const vertexSource=`
+attribute vec2 a_position;
+void main(){gl_Position=vec4(a_position,0.0,1.0);}
+`;
 
-let params = {
-    style:"liquid",
-    speed:0.5,
-    scale:1,
-    distortion:0.5,
-    brightness:1,
-    saturation:1,
-    contrast:1,
-    grain:0,
-    colorCount:4,
-    seed:384721
-};
+const fragmentSource=`
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
 
-function hash(n){
-    n = Math.sin(n * 12.9898 + params.seed * 78.233) * 43758.5453;
-    return n - Math.floor(n);
+uniform vec2 u_resolution;
+uniform float u_time;
+uniform float u_seed;
+uniform float u_scale;
+uniform float u_warp;
+uniform float u_freq;
+uniform float u_rotation;
+uniform float u_brightness;
+uniform float u_saturation;
+uniform float u_contrast;
+uniform float u_softness;
+uniform float u_glow;
+uniform float u_grain;
+uniform float u_vignette;
+uniform float u_c1r,u_c1g,u_c1b;
+uniform float u_c2r,u_c2g,u_c2b;
+uniform float u_c3r,u_c3g,u_c3b;
+uniform float u_c4r,u_c4g,u_c4b;
+uniform float u_c5r,u_c5g,u_c5b;
+uniform float u_c6r,u_c6g,u_c6b;
+uniform int u_style;
+uniform int u_colorCount;
+
+float hash(vec2 p){
+ p+=u_seed;
+ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);
+}
+float noise(vec2 p){
+ vec2 i=floor(p),f=fract(p);
+ f=f*f*(3.0-2.0*f);
+ return mix(mix(hash(i),hash(i+vec2(1.0,0.0)),f.x),
+            mix(hash(i+vec2(0.0,1.0)),hash(i+vec2(1.0,1.0)),f.x),f.y);
+}
+float fbm(vec2 p){
+ float v=0.0,a=.5;
+ for(int i=0;i<4;i++){v+=noise(p)*a;p*=2.0;a*=.5;}
+ return v;
+}
+vec2 R(vec2 p,float a){float c=cos(a),s=sin(a);return vec2(p.x*c-p.y*s,p.x*s+p.y*c);}
+
+vec3 C1(){return vec3(u_c1r,u_c1g,u_c1b);}
+vec3 C2(){return vec3(u_c2r,u_c2g,u_c2b);}
+vec3 C3(){return vec3(u_c3r,u_c3g,u_c3b);}
+vec3 C4(){return vec3(u_c4r,u_c4g,u_c4b);}
+vec3 C5(){return vec3(u_c5r,u_c5g,u_c5b);}
+vec3 C6(){return vec3(u_c6r,u_c6g,u_c6b);}
+
+vec3 pal(float t){
+ t=clamp(t,0.0,.9999);
+ if(u_colorCount<=2)return mix(C1(),C2(),t);
+ if(u_colorCount==3){
+  if(t<.5)return mix(C1(),C2(),t*2.0);
+  return mix(C2(),C3(),(t-.5)*2.0);
+ }
+ if(u_colorCount==4){
+  if(t<.3333)return mix(C1(),C2(),t*3.0);
+  if(t<.6666)return mix(C2(),C3(),(t-.3333)*3.0);
+  return mix(C3(),C4(),(t-.6666)*3.0);
+ }
+ if(u_colorCount==5){
+  if(t<.25)return mix(C1(),C2(),t*4.0);
+  if(t<.5)return mix(C2(),C3(),(t-.25)*4.0);
+  if(t<.75)return mix(C3(),C4(),(t-.5)*4.0);
+  return mix(C4(),C5(),(t-.75)*4.0);
+ }
+ if(t<.2)return mix(C1(),C2(),t*5.0);
+ if(t<.4)return mix(C2(),C3(),(t-.2)*5.0);
+ if(t<.6)return mix(C3(),C4(),(t-.4)*5.0);
+ if(t<.8)return mix(C4(),C5(),(t-.6)*5.0);
+ return mix(C5(),C6(),(t-.8)*5.0);
 }
 
-function noise(x,y){
-    return (
-        Math.sin(x * 1.7 + params.seed) *
-        0.5 +
-        Math.sin(y * 2.3 + params.seed * .3) *
-        0.25 +
-        Math.sin((x+y) * 3.1) *
-        0.25
-    );
+float pat(vec2 p,float t){
+ float v=.5;
+ float n=fbm(p*u_freq*.8+vec2(t*.1,-t*.08));
+ float r=length(p);
+ float a=atan(p.y,p.x);
+
+ if(u_style==0){p.x+=sin(p.y*3.0+t*1.2)*u_warp;p.y+=sin(p.x*2.0-t)*u_warp;v=.5+.25*sin(p.x*u_freq*2.0+t)+.25*cos(p.y*u_freq*2.2-t*.7);}
+ else if(u_style==1){p.y+=sin(p.x*5.0+t*1.4)*u_warp;p.x+=sin(p.y*2.0-t)*.25*u_warp;v=.5+.5*sin(p.x*u_freq*3.0+t);}
+ else if(u_style==2){v=.5+.5*sin(p.y*u_freq*5.0+sin(p.x*3.0+t)*u_warp+t);}
+ else if(u_style==3){p.y+=sin(p.x*8.0+t)*.35*u_warp;p.y+=sin(p.x*17.0-t)*.12*u_warp;v=.5+.5*sin(p.y*u_freq*4.0);}
+ else if(u_style==4||u_style==5){v=n;}
+ else if(u_style==6){p.x+=sin(p.y*5.0-t)*u_warp;v=.5+.5*sin(p.x*u_freq*3.0+sin(p.y*3.0)*2.0);}
+ else if(u_style==7){v=.5+.25*sin(p.x*u_freq*3.0+t)+.25*sin(p.y*u_freq*4.0-t)+.15*sin((p.x+p.y)*6.0+t);}
+ else if(u_style==8){v=fbm(p*1.4+vec2(t*.06,-t*.08));}
+ else if(u_style==9){v=.5+.5*sin(r*u_freq*8.0-t);}
+ else if(u_style==10){v=.5+.5*sin(r*u_freq*8.0+a*5.0-t*1.4);}
+ else if(u_style==11){v=.5+.5*sin(a*7.0+r*u_freq*9.0-t);}
+ else if(u_style==12){v=.5+.5*sin(r*u_freq*12.0-t*1.2);}
+ else if(u_style==13){v=.5+.5*sin(a*8.0+log(max(r,.01))*u_freq*5.0+t);}
+ else if(u_style==14){p+=vec2(sin(p.y*5.0+t),cos(p.x*4.0-t))*u_warp*.3;v=fbm(p*u_freq);}
+ else if(u_style==15){p+=vec2(sin(p.y*4.0+t),cos(p.x*3.0-t))*u_warp*.35;v=fbm(p*u_freq);}
+ else if(u_style==16){v=.5+.5*sin((p.x+fbm(p*2.0)*4.0)*u_freq*4.0+t);}
+ else if(u_style==17){v=smoothstep(.25,.75,fbm(p*2.5+vec2(t*.1)));}
+ else if(u_style==18){v=.5+.25*sin(p.x*7.0+t)+.25*sin(p.y*9.0-t*.7);}
+ else if(u_style==19){v=fbm(p*u_freq*2.5+t*.03);}
+ else if(u_style==20){v=.5+.5*sin(r*u_freq*13.0-t*.4);}
+ else if(u_style==21){float gx=abs(fract(p.x*u_freq*4.0)-.5),gy=abs(fract(p.y*u_freq*4.0)-.5);v=1.0-smoothstep(.02,.15,min(gx,gy));}
+ else if(u_style==22){v=.5+.5*sin((p.x+sin(p.y*3.0+t)*u_warp)*u_freq*12.0);}
+ else if(u_style==23){v=smoothstep(.25,.7,fbm(p*u_freq*2.0+t*.08));}
+ else if(u_style==24){v=fbm(p*u_freq*3.0+vec2(t*.1));}
+ else if(u_style==25){float d=0.0;for(int i=0;i<7;i++){vec2 q=p+vec2(sin(t*1.3+float(i)),cos(t+float(i)))*.45;d+=smoothstep(.16,.0,length(q-vec2(sin(float(i)*8.1+t),cos(float(i)*6.7-t))*.55));}v=clamp(d,.0,1.0);}
+ else if(u_style==26){float qx=p.x+.25*sin(t), qy=p.y;v=.5+.5*sin((qx+qy*.35)*u_freq*4.0);}
+ else if(u_style==27){p+=vec2(sin(p.y*6.0+t),cos(p.x*5.0-t))*.35*u_warp;v=fbm(p*2.0);}
+ else if(u_style==28){v=.5+.5*sin((p.x+p.y*.45+fbm(p*2.0)*.8)*u_freq*5.0+t);}
+ else {v=.5+.5*sin((p.x-p.y)*u_freq*5.0+sin(r*4.0-t)*u_warp);}
+ return clamp(v,0.0,1.0);
 }
 
-function hexToRgb(hex){
-    return [
-        parseInt(hex.slice(1,3),16)/255,
-        parseInt(hex.slice(3,5),16)/255,
-        parseInt(hex.slice(5,7),16)/255
-    ];
+void main(){
+ vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+ vec2 p=uv-.5;
+ p.x*=u_resolution.x/u_resolution.y;
+ p=R(p,u_rotation);
+ p*=u_scale;
+ float t=u_time;
+ p+=vec2(sin(t*.31),cos(t*.23))*.025*u_warp;
+ float v=pat(p,t);
+ v=mix(v,smoothstep(0.0,1.0,v),u_softness);
+ vec3 col=pal(v);
+ col+=smoothstep(.3,.85,v)*u_glow*.12;
+ col*=u_brightness;
+ float lum=dot(col,vec3(.299,.587,.114));
+ col=mix(vec3(lum),col,u_saturation);
+ col=(col-.5)*u_contrast+.5;
+ col+=(hash(gl_FragCoord.xy+t*40.0)-.5)*u_grain;
+ float vig=1.0-length(uv-.5)*1.414*u_vignette;
+ col*=vig;
+ gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);
 }
+`;
 
-function getColors(){
-    const count = params.colorCount;
-    const ids = ["c1","c2","c3","c4","c5","c6"];
-
-    return ids
-        .slice(0,count)
-        .map(id => hexToRgb(document.getElementById(id).value));
+function compile(type,source){
+ const s=gl.createShader(type);
+ gl.shaderSource(s,source);
+ gl.compileShader(s);
+ if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){
+   console.error(gl.getShaderInfoLog(s));
+   throw new Error(gl.getShaderInfoLog(s));
+ }
+ return s;
 }
-
-function palette(t, colors){
-
-    t = Math.max(0,Math.min(.999,t));
-
-    const pos = t * (colors.length-1);
-
-    const i = Math.floor(pos);
-    const f = pos-i;
-
-    const a = colors[i];
-    const b = colors[Math.min(i+1,colors.length-1)];
-
-    return [
-        a[0]*(1-f)+b[0]*f,
-        a[1]*(1-f)+b[1]*f,
-        a[2]*(1-f)+b[2]*f
-    ];
+const program=gl.createProgram();
+gl.attachShader(program,compile(gl.VERTEX_SHADER,vertexSource));
+gl.attachShader(program,compile(gl.FRAGMENT_SHADER,fragmentSource));
+gl.linkProgram(program);
+if(!gl.getProgramParameter(program,gl.LINK_STATUS)){
+ console.error(gl.getProgramInfoLog(program));
+ throw new Error(gl.getProgramInfoLog(program));
 }
+gl.useProgram(program);
 
-function clamp(v){
-    return Math.max(0,Math.min(1,v));
+const buffer=gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,-1,1,1,-1,1,1]),gl.STATIC_DRAW);
+const pos=gl.getAttribLocation(program,"a_position");
+gl.enableVertexAttribArray(pos);
+gl.vertexAttribPointer(pos,2,gl.FLOAT,false,0,0);
+
+const U={};
+["u_resolution","u_time","u_seed","u_scale","u_warp","u_freq","u_rotation","u_brightness","u_saturation","u_contrast","u_softness","u_glow","u_grain","u_vignette","u_style","u_colorCount"].forEach(n=>U[n]=gl.getUniformLocation(program,n));
+U.colors=[];
+for(let i=1;i<=6;i++)U.colors.push({
+ r:gl.getUniformLocation(program,"u_c"+i+"r"),
+ g:gl.getUniformLocation(program,"u_c"+i+"g"),
+ b:gl.getUniformLocation(program,"u_c"+i+"b")
+});
+
+const state={style:0,speed:.5,scale:1,warp:.5,freq:2,rotation:0,brightness:1,saturation:1,contrast:1,softness:.5,glow:.2,grain:0,vignette:0,colorCount:4,seed:384721};
+const styleNames=["liquid","silk","waves","ribbons","smoke","clouds","aurora","plasma","nebula","cosmic","vortex","spiral","rings","tunnel","warp","organic","marble","lava","water","sand","topographic","grid","lines","cells","noise","bokeh","sunset","liquid2","folds","energy"];
+
+function rgb(hex){return[parseInt(hex.slice(1,3),16)/255,parseInt(hex.slice(3,5),16)/255,parseInt(hex.slice(5,7),16)/255]}
+function uploadColors(){
+ for(let i=0;i<6;i++){let c=rgb(document.getElementById("c"+(i+1)).value),u=U.colors[i];gl.uniform1f(u.r,c[0]);gl.uniform1f(u.g,c[1]);gl.uniform1f(u.b,c[2]);}
+ gl.uniform1i(U.colorCount,state.colorCount);
 }
-
-function render(){
-
-    if(!running){
-        requestAnimationFrame(render);
-        return;
-    }
-
-    const now = performance.now();
-    const time = (now-startTime)/1000 * params.speed;
-
-    const w = canvas.width;
-    const h = canvas.height;
-
-    const image = ctx.createImageData(w,h);
-    const data = image.data;
-
-    const colors = getColors();
-
-    const aspect = w/h;
-
-    const style = params.style;
-
-    let p = 0;
-
-    // Render at a lighter internal sampling rate
-    // while keeping the preview high quality.
-    for(let y=0;y<h;y++){
-
-        const ny = (y/h-.5)*2;
-
-        for(let x=0;x<w;x++){
-
-            const nx = ((x/w-.5)*2)*aspect;
-
-            let xx = nx;
-            let yy = ny;
-
-            const d = params.distortion;
-
-            if(style === "liquid"){
-                xx += Math.sin(yy*3 + time*1.2)*.35*d;
-                yy += Math.sin(xx*2.5 - time)*.25*d;
-            }
-
-            else if(style === "silk"){
-                yy += Math.sin(nx*4 + time*1.4)*.35*d;
-                xx += Math.sin(ny*2 - time*.8)*.15*d;
-            }
-
-            else if(style === "aurora"){
-                xx += Math.sin(ny*5-time)*.3*d;
-                yy += Math.sin(nx*2+time)*.15*d;
-            }
-
-            else if(style === "vortex"){
-                const r = Math.sqrt(xx*xx+yy*yy);
-                const a = Math.atan2(yy,xx)+r*2*d+time*.5;
-                xx = Math.cos(a)*r;
-                yy = Math.sin(a)*r;
-            }
-
-            else if(style === "ribbon"){
-                yy += Math.sin(nx*5+time*1.3)*.22*d;
-                yy += Math.sin(nx*11-time)*.08*d;
-            }
-
-            else if(style === "plasma"){
-                xx += Math.sin(yy*7+time)*.15*d;
-                yy += Math.cos(xx*6-time)*.15*d;
-            }
-
-            else if(style === "organic"){
-                xx += Math.sin(yy*3+time)*.25*d;
-                yy += Math.cos(xx*3-time*.7)*.25*d;
-            }
-
-            else if(style === "rings"){
-                const r = Math.sqrt(xx*xx+yy*yy);
-                const wave = Math.sin(r*8-time*1.5);
-                xx += wave*.15*d;
-                yy += wave*.15*d;
-            }
-
-            else if(style === "waves"){
-                yy += Math.sin(nx*4+time)*.3*d;
-                yy += Math.sin(nx*9-time*.5)*.1*d;
-            }
-
-            else if(style === "cosmic"){
-                const r = Math.sqrt(xx*xx+yy*yy);
-                xx += Math.sin(yy*8+time)*.12*d;
-                yy += Math.cos(xx*7-time)*.12*d;
-            }
-
-            xx *= params.scale;
-            yy *= params.scale;
-
-            let value;
-
-            if(style === "vortex"){
-                value = .5 + .5*Math.sin(
-                    Math.sqrt(xx*xx+yy*yy)*3 -
-                    time
-                );
-            }
-            else if(style === "rings"){
-                value = .5 + .5*Math.sin(
-                    Math.sqrt(xx*xx+yy*yy)*7-time*1.4
-                );
-            }
-            else{
-                value =
-                    .5 +
-                    .25*Math.sin(xx*2.4+time) +
-                    .25*Math.cos(yy*2.1-time*.8);
-            }
-
-            value = clamp(value);
-
-            let rgb = palette(value,colors);
-
-            // Brightness
-            rgb[0] *= params.brightness;
-            rgb[1] *= params.brightness;
-            rgb[2] *= params.brightness;
-
-            // Saturation
-            const lum =
-                .299*rgb[0]+
-                .587*rgb[1]+
-                .114*rgb[2];
-
-            rgb[0] = lum+(rgb[0]-lum)*params.saturation;
-            rgb[1] = lum+(rgb[1]-lum)*params.saturation;
-            rgb[2] = lum+(rgb[2]-lum)*params.saturation;
-
-            // Contrast
-            rgb[0] = (rgb[0]-.5)*params.contrast+.5;
-            rgb[1] = (rgb[1]-.5)*params.contrast+.5;
-            rgb[2] = (rgb[2]-.5)*params.contrast+.5;
-
-            // Grain
-            if(params.grain > 0){
-                const g =
-                    (hash(x*.01+y*.02+time*10)-.5) *
-                    params.grain;
-
-                rgb[0]+=g;
-                rgb[1]+=g;
-                rgb[2]+=g;
-            }
-
-            data[p++] = clamp(rgb[0])*255;
-            data[p++] = clamp(rgb[1])*255;
-            data[p++] = clamp(rgb[2])*255;
-            data[p++] = 255;
-        }
-    }
-
-    ctx.putImageData(image,0,0);
-
-    requestAnimationFrame(render);
+function uniforms(t){
+ gl.useProgram(program);
+ gl.uniform2f(U.resolution,canvas.width,canvas.height);
+ gl.uniform1f(U.time,t);
+ gl.uniform1f(U.seed,state.seed);
+ gl.uniform1f(U.scale,state.scale);
+ gl.uniform1f(U.warp,state.warp);
+ gl.uniform1f(U.freq,state.freq);
+ gl.uniform1f(U.rotation,state.rotation);
+ gl.uniform1f(U.brightness,state.brightness);
+ gl.uniform1f(U.saturation,state.saturation);
+ gl.uniform1f(U.contrast,state.contrast);
+ gl.uniform1f(U.softness,state.softness);
+ gl.uniform1f(U.glow,state.glow);
+ gl.uniform1f(U.grain,state.grain);
+ gl.uniform1f(U.vignette,state.vignette);
+ gl.uniform1i(U.style,state.style);
+ uploadColors();
 }
-
-
-/* =========================
-   VIDEO EXPORT — REALTIME CANVAS CAPTURE
-   ========================= */
-
-let exportRecorder = null;
-let exportStream = null;
-let exportRunning = false;
-let exportChunks = [];
-let exportRAF = 0;
-
-function supportedMime(){
-    const types = [
-        "video/webm;codecs=vp9",
-        "video/webm;codecs=vp8",
-        "video/webm"
-    ];
-
-    for(const type of types){
-        if(window.MediaRecorder &&
-           MediaRecorder.isTypeSupported(type)){
-            return type;
-        }
-    }
-
-    return "";
+let playing=true, start=performance.now();
+function frame(now){
+ if(playing){
+  uniforms((now-start)/1000*state.speed);
+  gl.viewport(0,0,canvas.width,canvas.height);
+  gl.drawArrays(gl.TRIANGLES,0,6);
+ }
+ requestAnimationFrame(frame);
 }
+requestAnimationFrame(frame);
 
-function downloadVideo(blob, filename){
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-
-    a.href = url;
-    a.download = filename;
-
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-
-    setTimeout(()=>{
-        URL.revokeObjectURL(url);
-    },5000);
+function bind(id,key,val){
+ const e=document.getElementById(id);
+ e.addEventListener("input",()=>{
+  state[key]=parseFloat(e.value);
+  document.getElementById(val).textContent=state[key].toFixed(2);
+ });
 }
-
-
-/*
-    IMPORTANT:
-    The live renderer is the same renderer used for export.
-
-    We temporarily resize the SAME canvas to the requested
-    output resolution, capture that canvas, and continuously
-    render animation frames into it while MediaRecorder records.
-*/
-
-function exportVideo(){
-
-    if(exportRunning){
-        return;
-    }
-
-    if(!window.MediaRecorder ||
-       !HTMLCanvasElement.prototype.captureStream){
-
-        alert("Your browser does not support canvas video recording.");
-        return;
-    }
-
-    const mime=supportedMime();
-
-    if(!mime){
-
-        alert("WebM recording is not supported in this browser.");
-        return;
-    }
-
-    const resolution=
-        document.getElementById("exportResolution").value;
-
-    const fps=
-        parseInt(
-            document.getElementById("exportFps").value,
-            10
-        );
-
-    const duration=
-        parseInt(
-            document.getElementById("exportDuration").value,
-            10
-        );
-
-    const parts=
-        resolution.split("x").map(Number);
-
-    const outW=parts[0];
-    const outH=parts[1];
-
-    /*
-       Save the live preview state.
-    */
-
-    const oldW=canvas.width;
-    const oldH=canvas.height;
-
-    const oldPlaying=playing;
-    const oldStartTime=startTime;
-
-    /*
-       Set REAL recording resolution.
-    */
-
-    canvas.width=outW;
-    canvas.height=outH;
-
-    /*
-       Start animation from time zero.
-    */
-
-    playing=true;
-    startTime=performance.now();
-
-    /*
-       Draw an actual first frame BEFORE recording starts.
-    */
-
-    renderOneFrame(0);
-
-    /*
-       Capture the SAME canvas that is being rendered.
-    */
-
-    exportStream=
-        canvas.captureStream(fps);
-
-    exportChunks=[];
-    exportRunning=true;
-
-    const bitrate=
-        outW>=3840
-        ? 40000000
-        : 25000000;
-
-    exportRecorder=
-        new MediaRecorder(
-            exportStream,
-            {
-                mimeType:mime,
-                videoBitsPerSecond:bitrate
-            }
-        );
-
-    exportRecorder.ondataavailable=e=>{
-
-        if(e.data && e.data.size>0){
-            exportChunks.push(e.data);
-        }
-
-    };
-
-    exportRecorder.onerror=e=>{
-
-        console.error(
-            "Recorder error:",
-            e
-        );
-
-        finishExport(
-            oldW,
-            oldH,
-            oldPlaying,
-            oldStartTime,
-            false
-        );
-
-    };
-
-    exportRecorder.onstop=()=>{
-
-        const blob=
-            new Blob(
-                exportChunks,
-                {type:mime}
-            );
-
-        const filename=
-            `Gradient_${outW}x${outH}_${fps}fps_${duration}s.webm`;
-
-        downloadVideo(
-            blob,
-            filename
-        );
-
-        finishExport(
-            oldW,
-            oldH,
-            oldPlaying,
-            oldStartTime,
-            true
-        );
-
-    };
-
-    document.getElementById(
-        "exportStatus"
-    ).textContent=
-        `Recording ${outW}×${outH} • ${fps} FPS • ${duration}s...`;
-
-    document.getElementById(
-        "exportProgress"
-    ).style.width="0%";
-
-    /*
-       Start recording.
-
-       250ms chunks prevent the browser from waiting
-       until the very end before producing data.
-    */
-
-    exportRecorder.start(250);
-
-    const recordingStart=
-        performance.now();
-
-    /*
-       REALTIME rendering loop.
-
-       This is the important fix:
-       every animation frame is rendered into the
-       canvas while MediaRecorder is capturing it.
-    */
-
-    function recordFrame(now){
-
-        if(!exportRunning){
-            return;
-        }
-
-        const elapsed=
-            (now-recordingStart)/1000;
-
-        if(elapsed>=duration){
-
-            document.getElementById(
-                "exportProgress"
-            ).style.width="100%";
-
-            if(
-                exportRecorder &&
-                exportRecorder.state!=="inactive"
-            ){
-
-                exportRecorder.stop();
-
-            }
-
-            return;
-        }
-
-        /*
-           Render the current animation time.
-        */
-
-        renderOneFrame(
-            elapsed
-        );
-
-        const percent=
-            Math.min(
-                99,
-                elapsed/duration*100
-            );
-
-        document.getElementById(
-            "exportProgress"
-        ).style.width=
-            percent+"%";
-
-        exportRAF=
-            requestAnimationFrame(
-                recordFrame
-            );
-
-    }
-
-    exportRAF=
-        requestAnimationFrame(
-            recordFrame
-        );
-
-}
-
-
-/*
-    Draw exactly one frame using the ORIGINAL
-    2D renderer logic.
-*/
-
-function renderOneFrame(timeSeconds){
-
-    const w=canvas.width;
-    const h=canvas.height;
-
-    const image=
-        ctx.createImageData(w,h);
-
-    const data=image.data;
-
-    const colors=getColors();
-
-    const aspect=w/h;
-
-    const style=params.style;
-
-    let p=0;
-
-    /*
-       At 4K this is intentionally expensive,
-       but it gives the recorder real moving frames.
-    */
-
-    for(let y=0;y<h;y++){
-
-        const ny=(y/h-.5)*2;
-
-        for(let x=0;x<w;x++){
-
-            const nx=
-                ((x/w-.5)*2)*aspect;
-
-            let xx=nx;
-            let yy=ny;
-
-            const d=params.distortion;
-
-            if(style==="liquid"){
-
-                xx +=
-                    Math.sin(
-                        yy*3+
-                        timeSeconds*1.2
-                    )*.35*d;
-
-                yy +=
-                    Math.sin(
-                        xx*2.5-
-                        timeSeconds
-                    )*.25*d;
-
-            }
-
-            else if(style==="silk"){
-
-                yy +=
-                    Math.sin(
-                        nx*4+
-                        timeSeconds*1.4
-                    )*.35*d;
-
-                xx +=
-                    Math.sin(
-                        ny*2-
-                        timeSeconds*.8
-                    )*.15*d;
-
-            }
-
-            else if(style==="aurora"){
-
-                xx +=
-                    Math.sin(
-                        ny*5-
-                        timeSeconds
-                    )*.3*d;
-
-                yy +=
-                    Math.sin(
-                        nx*2+
-                        timeSeconds
-                    )*.15*d;
-
-            }
-
-            else if(style==="vortex"){
-
-                const r=
-                    Math.sqrt(
-                        xx*xx+
-                        yy*yy
-                    );
-
-                const a=
-                    Math.atan2(yy,xx)+
-                    r*2*d+
-                    timeSeconds*.5;
-
-                xx=Math.cos(a)*r;
-                yy=Math.sin(a)*r;
-
-            }
-
-            else if(style==="ribbon"){
-
-                yy +=
-                    Math.sin(
-                        nx*5+
-                        timeSeconds*1.3
-                    )*.22*d;
-
-                yy +=
-                    Math.sin(
-                        nx*11-
-                        timeSeconds
-                    )*.08*d;
-
-            }
-
-            else if(style==="plasma"){
-
-                xx +=
-                    Math.sin(
-                        yy*7+
-                        timeSeconds
-                    )*.15*d;
-
-                yy +=
-                    Math.cos(
-                        xx*6-
-                        timeSeconds
-                    )*.15*d;
-
-            }
-
-            else if(style==="organic"){
-
-                xx +=
-                    Math.sin(
-                        yy*3+
-                        timeSeconds
-                    )*.25*d;
-
-                yy +=
-                    Math.cos(
-                        xx*3-
-                        timeSeconds*.7
-                    )*.25*d;
-
-            }
-
-            else if(style==="rings"){
-
-                const r=
-                    Math.sqrt(
-                        xx*xx+
-                        yy*yy
-                    );
-
-                const wave=
-                    Math.sin(
-                        r*8-
-                        timeSeconds*1.5
-                    );
-
-                xx+=wave*.15*d;
-                yy+=wave*.15*d;
-
-            }
-
-            else if(style==="waves"){
-
-                yy +=
-                    Math.sin(
-                        nx*4+
-                        timeSeconds
-                    )*.3*d;
-
-                yy +=
-                    Math.sin(
-                        nx*9-
-                        timeSeconds*.5
-                    )*.1*d;
-
-            }
-
-            else if(style==="cosmic"){
-
-                xx +=
-                    Math.sin(
-                        yy*8+
-                        timeSeconds
-                    )*.12*d;
-
-                yy +=
-                    Math.cos(
-                        xx*7-
-                        timeSeconds
-                    )*.12*d;
-
-            }
-
-            xx*=params.scale;
-            yy*=params.scale;
-
-            let value;
-
-            if(style==="vortex"){
-
-                value=
-                    .5+
-                    .5*Math.sin(
-                        Math.sqrt(
-                            xx*xx+
-                            yy*yy
-                        )*3-
-                        timeSeconds
-                    );
-
-            }
-
-            else if(style==="rings"){
-
-                value=
-                    .5+
-                    .5*Math.sin(
-                        Math.sqrt(
-                            xx*xx+
-                            yy*yy
-                        )*7-
-                        timeSeconds*1.4
-                    );
-
-            }
-
-            else{
-
-                value=
-                    .5+
-                    .25*Math.sin(
-                        xx*2.4+
-                        timeSeconds
-                    )+
-                    .25*Math.cos(
-                        yy*2.1-
-                        timeSeconds*.8
-                    );
-
-            }
-
-            value=clamp(value);
-
-            let rgb=
-                palette(
-                    value,
-                    colors
-                );
-
-            rgb[0]*=params.brightness;
-            rgb[1]*=params.brightness;
-            rgb[2]*=params.brightness;
-
-            const lum=
-                .299*rgb[0]+
-                .587*rgb[1]+
-                .114*rgb[2];
-
-            rgb[0]=
-                lum+
-                (rgb[0]-lum)*
-                params.saturation;
-
-            rgb[1]=
-                lum+
-                (rgb[1]-lum)*
-                params.saturation;
-
-            rgb[2]=
-                lum+
-                (rgb[2]-lum)*
-                params.saturation;
-
-            rgb[0]=
-                (rgb[0]-.5)*
-                params.contrast+
-                .5;
-
-            rgb[1]=
-                (rgb[1]-.5)*
-                params.contrast+
-                .5;
-
-            rgb[2]=
-                (rgb[2]-.5)*
-                params.contrast+
-                .5;
-
-            if(params.grain>0){
-
-                const g=
-                    (
-                        hash(
-                            x*.01+
-                            y*.02+
-                            timeSeconds*10
-                        )-
-                        .5
-                    )*
-                    params.grain;
-
-                rgb[0]+=g;
-                rgb[1]+=g;
-                rgb[2]+=g;
-
-            }
-
-            data[p++]=clamp(rgb[0])*255;
-            data[p++]=clamp(rgb[1])*255;
-            data[p++]=clamp(rgb[2])*255;
-            data[p++]=255;
-
-        }
-
-    }
-
-    ctx.putImageData(
-        image,
-        0,
-        0
-    );
-
-}
-
-
-/*
-    Restore the live preview after export.
-*/
-
-function finishExport(
-    oldW,
-    oldH,
-    oldPlaying,
-    oldStartTime,
-    success
-){
-
-    if(exportRAF){
-        cancelAnimationFrame(exportRAF);
-        exportRAF=0;
-    }
-
-    if(exportStream){
-
-        exportStream
-            .getTracks()
-            .forEach(
-                track=>track.stop()
-            );
-
-    }
-
-    exportStream=null;
-    exportRecorder=null;
-    exportRunning=false;
-
-    canvas.width=oldW;
-    canvas.height=oldH;
-
-    playing=oldPlaying;
-    startTime=oldStartTime;
-
-    if(success){
-
-        document.getElementById(
-            "exportStatus"
-        ).textContent=
-            "Export complete — video downloaded.";
-
-        document.getElementById(
-            "exportProgress"
-        ).style.width="100%";
-
-    }
-
-    else{
-
-        document.getElementById(
-            "exportStatus"
-        ).textContent=
-            "Export stopped.";
-
-    }
-
-}
-
-
-/*
-    Stop button.
-*/
-
-function stopExport(){
-
-    if(!exportRunning){
-        return;
-    }
-
-    exportRunning=false;
-
-    if(exportRAF){
-        cancelAnimationFrame(exportRAF);
-        exportRAF=0;
-    }
-
-    if(
-        exportRecorder &&
-        exportRecorder.state!=="inactive"
-    ){
-
-        exportRecorder.stop();
-
-    }
-
-}
-
-
-function randomHex(){
-    return "#"+Math.floor(
-        Math.random()*16777215
-    ).toString(16).padStart(6,"0");
-}
-
+bind("speed","speed","speedVal");bind("scale","scale","scaleVal");bind("warp","warp","warpVal");bind("freq","freq","freqVal");bind("rotation","rotation","rotationVal");
+bind("brightness","brightness","brightnessVal");bind("saturation","saturation","saturationVal");bind("contrast","contrast","contrastVal");bind("softness","softness","softnessVal");bind("glow","glow","glowVal");bind("grain","grain","grainVal");bind("vignette","vignette","vignetteVal");
+
+document.querySelectorAll(".color").forEach(e=>e.addEventListener("input",uploadColors));
+document.getElementById("colorCount").addEventListener("input",e=>{state.colorCount=+e.target.value;document.getElementById("colorCountVal").textContent=state.colorCount;uploadColors()});
+document.getElementById("style").addEventListener("change",e=>{state.style=styleNames.indexOf(e.target.value);document.getElementById("status").textContent="60 FPS • "+e.target.value});
+document.getElementById("applySeed").addEventListener("click",()=>{state.seed=parseInt(document.getElementById("seed").value)||1;start=performance.now()});
+function randHex(){return"#"+Math.floor(Math.random()*16777215).toString(16).padStart(6,"0")}
 function randomize(){
-
-    const styles = [
-        "liquid",
-        "silk",
-        "aurora",
-        "vortex",
-        "ribbon",
-        "plasma",
-        "organic",
-        "rings",
-        "waves",
-        "cosmic"
-    ];
-
-    const style =
-        styles[Math.floor(Math.random()*styles.length)];
-
-    document.getElementById("style").value = style;
-
-    params.style = style;
-
-    params.speed = .15 + Math.random()*1.1;
-    params.scale = .5 + Math.random()*1.7;
-    params.distortion = Math.random()*1.5;
-    params.brightness = .75 + Math.random()*.5;
-    params.saturation = .7 + Math.random()*1;
-    params.contrast = .8 + Math.random()*.6;
-    params.grain = Math.random()*.04;
-    params.colorCount = 3 + Math.floor(Math.random()*4);
-    params.seed = Math.floor(Math.random()*99999999);
-
-    document.getElementById("seed").value=params.seed;
-
-    const colors = [
-        "#"+randomHex().slice(1),
-        "#"+randomHex().slice(1),
-        "#"+randomHex().slice(1),
-        "#"+randomHex().slice(1),
-        "#"+randomHex().slice(1),
-        "#"+randomHex().slice(1)
-    ];
-
-    colors.forEach((c,i)=>{
-        document.getElementById("c"+(i+1)).value=c;
-    });
-
-    updateUI();
+ state.style=Math.floor(Math.random()*styleNames.length);
+ state.speed=.15+Math.random()*1.15;
+ state.scale=.45+Math.random()*2;
+ state.warp=Math.random()*1.7;
+ state.freq=.5+Math.random()*6;
+ state.rotation=-3.14+Math.random()*6.28;
+ state.brightness=.8+Math.random()*.45;
+ state.saturation=.7+Math.random()*1.1;
+ state.contrast=.8+Math.random()*.5;
+ state.softness=Math.random();
+ state.glow=Math.random()*.7;
+ state.grain=Math.random()*.025;
+ state.vignette=Math.random()*.35;
+ state.colorCount=2+Math.floor(Math.random()*5);
+ state.seed=Math.floor(Math.random()*999999999);
+ document.getElementById("style").value=styleNames[state.style];
+ document.getElementById("seed").value=state.seed;
+ for(let i=1;i<=6;i++)document.getElementById("c"+i).value=randHex();
+ sync();
+ start=performance.now();
 }
-
-function updateUI(){
-
-    document.getElementById("speed").value=params.speed;
-    document.getElementById("scale").value=params.scale;
-    document.getElementById("distortion").value=params.distortion;
-    document.getElementById("brightness").value=params.brightness;
-    document.getElementById("saturation").value=params.saturation;
-    document.getElementById("contrast").value=params.contrast;
-    document.getElementById("grain").value=params.grain;
-    document.getElementById("colorCount").value=params.colorCount;
-
-    document.getElementById("speedVal").textContent=params.speed.toFixed(2);
-    document.getElementById("scaleVal").textContent=params.scale.toFixed(2);
-    document.getElementById("distortionVal").textContent=params.distortion.toFixed(2);
-    document.getElementById("brightnessVal").textContent=params.brightness.toFixed(2);
-    document.getElementById("saturationVal").textContent=params.saturation.toFixed(2);
-    document.getElementById("contrastVal").textContent=params.contrast.toFixed(2);
-    document.getElementById("grainVal").textContent=params.grain.toFixed(3);
-    document.getElementById("colorCountVal").textContent=params.colorCount;
-
-    document.getElementById("status").textContent =
-        "Live • "+params.style;
+function sync(){
+ ["speed","scale","warp","freq","rotation","brightness","saturation","contrast","softness","glow","grain","vignette"].forEach(k=>{document.getElementById(k).value=state[k];document.getElementById(k+"Val").textContent=state[k].toFixed(2)});
+ document.getElementById("colorCount").value=state.colorCount;
+ document.getElementById("colorCountVal").textContent=state.colorCount;
+ uploadColors();
 }
-
-function bindRange(id,key,valId){
-
-    const el=document.getElementById(id);
-
-    el.addEventListener("input",()=>{
-
-        params[key]=parseFloat(el.value);
-
-        document.getElementById(valId).textContent =
-            parseFloat(el.value).toFixed(
-                key==="grain"?3:2
-            );
-    });
-}
-
-bindRange("speed","speed","speedVal");
-bindRange("scale","scale","scaleVal");
-bindRange("distortion","distortion","distortionVal");
-bindRange("brightness","brightness","brightnessVal");
-bindRange("saturation","saturation","saturationVal");
-bindRange("contrast","contrast","contrastVal");
-bindRange("grain","grain","grainVal");
-
-document.getElementById("style")
-.addEventListener("change",e=>{
-    params.style=e.target.value;
-    updateUI();
+document.getElementById("random").onclick=randomize;
+document.getElementById("random2").onclick=randomize;
+document.getElementById("pause").onclick=()=>{
+ playing=!playing;
+ document.getElementById("pause").textContent=playing?"Ⅱ Pause":"▶ Resume";
+ if(playing)start=performance.now();
+};
+document.getElementById("quality").addEventListener("change",e=>{
+ const high=e.target.value==="1080";
+ canvas.width=high?1280:960;
+ canvas.height=high?720:540;
+ document.getElementById("info").textContent=(high?"1280 × 720":"960 × 540")+" • GPU • "+(high?"High":"Performance");
 });
-
-document.getElementById("colorCount")
-.addEventListener("input",e=>{
-    params.colorCount=parseInt(e.target.value);
-    document.getElementById("colorCountVal").textContent=params.colorCount;
-});
-
-document.querySelectorAll(".colorBox")
-.forEach(el=>{
-    el.addEventListener("input",()=>{
-        document.getElementById("status").textContent="Color updated";
-    });
-});
-
-document.getElementById("randomBtn")
-.addEventListener("click",randomize);
-
-document.getElementById("pauseBtn")
-.addEventListener("click",()=>{
-
-    running=!running;
-
-    document.getElementById("pauseBtn").textContent =
-        running ? "Ⅱ Pause" : "▶ Resume";
-});
-
-document.getElementById("playBtn")
-.addEventListener("click",()=>{
-
-    running=true;
-
-    document.getElementById("pauseBtn").textContent="Ⅱ Pause";
-});
-
-document.getElementById("applySeed")
-.addEventListener("click",()=>{
-
-    params.seed=parseInt(
-        document.getElementById("seed").value
-    ) || 1;
-
-    updateUI();
-});
-
-document.getElementById("fullscreenBtn")
-.addEventListener("click",()=>{
-
-    if(canvas.requestFullscreen){
-        canvas.requestFullscreen();
-    }
-});
-
-document.getElementById("resolution")
-.addEventListener("change",e=>{
-    const [w,h]=e.target.value.split("x").map(Number);
-    document.getElementById("info").textContent =
-        `${w} × ${h} Output • Preview stays 1280 × 720`;
-});
-
-randomize();
-
-render();
-
+sync();
+gl.viewport(0,0,canvas.width,canvas.height);
+uniforms(0);
+gl.drawArrays(gl.TRIANGLES,0,6);
 </script>
-
 </body>
 </html>
