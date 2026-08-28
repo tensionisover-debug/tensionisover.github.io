@@ -482,9 +482,6 @@ GPU • Ready
 
 <div class="bottom">
 
-<button id="pause">Ⅱ Pause</button>
-<button id="randomBottom">✦ Random</button>
-
 <div style="flex:1"></div>
 
 <span class="small" id="info">
@@ -547,19 +544,22 @@ gl_Position=vec4(a_position,0.0,1.0);
 FRAGMENT SHADER
 ========================= */
 
+
 const fragmentSource=`
 
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+#else
+precision mediump float;
+#endif
 
 uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_seed;
-
 uniform float u_scale;
 uniform float u_warp;
 uniform float u_freq;
 uniform float u_rotation;
-
 uniform float u_brightness;
 uniform float u_saturation;
 uniform float u_contrast;
@@ -567,541 +567,211 @@ uniform float u_softness;
 uniform float u_glow;
 uniform float u_grain;
 uniform float u_vignette;
-
+uniform float u_c1r;
+uniform float u_c1g;
+uniform float u_c1b;
+uniform float u_c2r;
+uniform float u_c2g;
+uniform float u_c2b;
+uniform float u_c3r;
+uniform float u_c3g;
+uniform float u_c3b;
+uniform float u_c4r;
+uniform float u_c4g;
+uniform float u_c4b;
+uniform float u_c5r;
+uniform float u_c5g;
+uniform float u_c5b;
+uniform float u_c6r;
+uniform float u_c6g;
+uniform float u_c6b;
 uniform int u_style;
 uniform int u_colorCount;
 
-uniform vec3 u_colors[6];
-
-
 float hash(vec2 p){
-
-p += u_seed;
-
-return fract(
-sin(dot(p,vec2(127.1,311.7)))*
-43758.5453123
-);
-
+    p += u_seed;
+    return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453123);
 }
-
 
 float noise(vec2 p){
-
-vec2 i=floor(p);
-vec2 f=fract(p);
-
-f=f*f*(3.0-2.0*f);
-
-float a=hash(i);
-float b=hash(i+vec2(1.0,0.0));
-float c=hash(i+vec2(0.0,1.0));
-float d=hash(i+vec2(1.0,1.0));
-
-return mix(
-mix(a,b,f.x),
-mix(c,d,f.x),
-f.y
-);
-
+    vec2 i=floor(p);
+    vec2 f=fract(p);
+    f=f*f*(3.0-2.0*f);
+    float a=hash(i);
+    float b=hash(i+vec2(1.0,0.0));
+    float c=hash(i+vec2(0.0,1.0));
+    float d=hash(i+vec2(1.0,1.0));
+    return mix(mix(a,b,f.x),mix(c,d,f.x),f.y);
 }
-
 
 float fbm(vec2 p){
-
-float v=0.0;
-float a=.5;
-
-for(int i=0;i<5;i++){
-
-v+=noise(p)*a;
-p*=2.0;
-a*=.5;
-
+    float v=0.0;
+    float a=0.5;
+    for(int i=0;i<5;i++){
+        v += noise(p)*a;
+        p *= 2.0;
+        a *= 0.5;
+    }
+    return v;
 }
 
-return v;
-
+vec2 rot(vec2 p,float a){
+    float c=cos(a);
+    float s=sin(a);
+    return vec2(p.x*c-p.y*s,p.x*s+p.y*c);
 }
 
-
-vec2 rotate(vec2 p,float a){
-
-float c=cos(a);
-float s=sin(a);
-
-return vec2(
-p.x*c-p.y*s,
-p.x*s+p.y*c
-);
-
-}
-
+vec3 C1(){return vec3(u_c1r,u_c1g,u_c1b);}
+vec3 C2(){return vec3(u_c2r,u_c2g,u_c2b);}
+vec3 C3(){return vec3(u_c3r,u_c3g,u_c3b);}
+vec3 C4(){return vec3(u_c4r,u_c4g,u_c4b);}
+vec3 C5(){return vec3(u_c5r,u_c5g,u_c5b);}
+vec3 C6(){return vec3(u_c6r,u_c6g,u_c6b);}
 
 vec3 palette(float t){
+    t=clamp(t,0.0,0.9999);
 
-t=clamp(t,0.0,0.999);
+    if(u_colorCount<=2){
+        return mix(C1(),C2(),t);
+    }
+    if(u_colorCount==3){
+        if(t<0.5) return mix(C1(),C2(),t*2.0);
+        return mix(C2(),C3(),(t-0.5)*2.0);
+    }
+    if(u_colorCount==4){
+        if(t<0.333333) return mix(C1(),C2(),t*3.0);
+        if(t<0.666666) return mix(C2(),C3(),(t-0.333333)*3.0);
+        return mix(C3(),C4(),(t-0.666666)*3.0);
+    }
+    if(u_colorCount==5){
+        if(t<0.25) return mix(C1(),C2(),t*4.0);
+        if(t<0.5) return mix(C2(),C3(),(t-0.25)*4.0);
+        if(t<0.75) return mix(C3(),C4(),(t-0.5)*4.0);
+        return mix(C4(),C5(),(t-0.75)*4.0);
+    }
 
-int count = clamp(u_colorCount,2,6);
-float pos = t * float(count-1);
-int id = int(floor(pos));
-float f = fract(pos);
-
-vec3 a = u_colors[0];
-vec3 b = u_colors[1];
-
-if(id==0){
-  a=u_colors[0]; b=u_colors[1];
+    if(t<0.2) return mix(C1(),C2(),t*5.0);
+    if(t<0.4) return mix(C2(),C3(),(t-0.2)*5.0);
+    if(t<0.6) return mix(C3(),C4(),(t-0.4)*5.0);
+    if(t<0.8) return mix(C4(),C5(),(t-0.6)*5.0);
+    return mix(C5(),C6(),(t-0.8)*5.0);
 }
-else if(id==1){
-  a=u_colors[1]; b=u_colors[2];
-}
-else if(id==2){
-  a=u_colors[2]; b=u_colors[3];
-}
-else if(id==3){
-  a=u_colors[3]; b=u_colors[4];
-}
-else{
-  a=u_colors[4]; b=u_colors[5];
-}
-
-return mix(a,b,f);
-
-}
-
 
 float pattern(vec2 p,float t){
+    vec2 q=p;
+    float v=0.5;
 
-vec2 q=p;
+    if(u_style==0){
+        q.x += sin(q.y*3.0+t*1.2)*u_warp;
+        q.y += sin(q.x*2.0-t)*u_warp;
+        v=0.5+0.25*sin(q.x*u_freq*2.0+t)+0.25*cos(q.y*u_freq*2.2-t*0.7);
+    } else if(u_style==1){
+        q.y += sin(q.x*5.0+t*1.4)*u_warp;
+        q.x += sin(q.y*2.0-t)*0.25*u_warp;
+        v=0.5+0.5*sin(q.x*u_freq*3.0+t);
+    } else if(u_style==2){
+        v=0.5+0.5*sin(q.y*u_freq*5.0+sin(q.x*3.0+t)*u_warp+t);
+    } else if(u_style==3){
+        q.y += sin(q.x*8.0+t)*0.35*u_warp;
+        q.y += sin(q.x*17.0-t)*0.12*u_warp;
+        v=0.5+0.5*sin(q.y*u_freq*4.0);
+    } else if(u_style==4){
+        v=fbm(q*u_freq*0.8+vec2(t*0.15,-t*0.1));
+    } else if(u_style==5){
+        v=fbm(q*u_freq*0.55+vec2(t*0.08,t*0.04));
+    } else if(u_style==6){
+        q.x += sin(q.y*5.0-t)*u_warp;
+        v=0.5+0.5*sin(q.x*u_freq*3.0+sin(q.y*3.0)*2.0);
+    } else if(u_style==7){
+        v=0.5+0.25*sin(q.x*u_freq*3.0+t)+0.25*sin(q.y*u_freq*4.0-t)+0.15*sin((q.x+q.y)*6.0+t);
+    } else if(u_style==8){
+        v=fbm(q*3.0*u_freq*0.4+vec2(t*0.06,-t*0.08));
+    } else if(u_style==9){
+        float r=length(q);
+        v=0.5+0.5*sin(r*u_freq*8.0-t);
+    } else if(u_style==10){
+        float r=length(q);
+        float a=atan(q.y,q.x);
+        v=0.5+0.5*sin(r*u_freq*8.0+a*5.0-t*1.4);
+    } else if(u_style==11){
+        float r=length(q);
+        float a=atan(q.y,q.x);
+        v=0.5+0.5*sin(a*7.0+r*u_freq*9.0-t);
+    } else if(u_style==12){
+        float r=length(q);
+        v=0.5+0.5*sin(r*u_freq*12.0-t*1.2);
+    } else if(u_style==13){
+        float r=max(length(q),0.01);
+        float a=atan(q.y,q.x);
+        v=0.5+0.5*sin(a*8.0+log(r)*u_freq*5.0+t);
+    } else if(u_style==14){
+        q += vec2(sin(q.y*5.0+t),cos(q.x*4.0-t))*u_warp*0.3;
+        v=fbm(q*u_freq);
+    } else if(u_style==15){
+        q += vec2(sin(q.y*4.0+t),cos(q.x*3.0-t))*u_warp*0.35;
+        v=fbm(q*u_freq);
+    } else if(u_style==16){
+        float n=fbm(q*3.0);
+        v=0.5+0.5*sin((q.x+n*4.0)*u_freq*4.0+t);
+    } else if(u_style==17){
+        float n=fbm(q*2.5+vec2(t*0.1));
+        v=smoothstep(0.25,0.75,n);
+    } else if(u_style==18){
+        v=0.5+0.25*sin(q.x*7.0+t)+0.25*sin(q.y*9.0-t*0.7);
+    } else if(u_style==19){
+        v=fbm(q*u_freq*4.0+t*0.03);
+    } else if(u_style==20){
+        float r=length(q);
+        v=0.5+0.5*sin(r*u_freq*13.0-t*0.4);
+    } else if(u_style==21){
+        float gx=abs(fract(q.x*u_freq*4.0)-0.5);
+        float gy=abs(fract(q.y*u_freq*4.0)-0.5);
+        v=1.0-smoothstep(0.02,0.15,min(gx,gy));
+    } else if(u_style==22){
+        v=0.5+0.5*sin((q.x+sin(q.y*3.0+t)*u_warp)*u_freq*12.0);
+    } else if(u_style==23){
+        v=fbm(q*u_freq*2.0+t*0.08);
+        v=smoothstep(0.25,0.7,v);
+    } else {
+        v=fbm(q*u_freq*3.0+vec2(t*0.1));
+    }
 
-float v=0.5;
-
-
-/* LIQUID */
-
-if(u_style==0){
-
-q.x+=sin(q.y*3.0+t*1.2)*u_warp;
-q.y+=sin(q.x*2.0-t)*u_warp;
-
-v=
-.5+
-.25*sin(q.x*u_freq*2.0+t)+
-.25*cos(q.y*u_freq*2.2-t*.7);
-
+    return clamp(v,0.0,1.0);
 }
-
-
-/* SILK */
-
-else if(u_style==1){
-
-q.y+=sin(q.x*5.0+t*1.4)*u_warp;
-q.x+=sin(q.y*2.0-t)*.25*u_warp;
-
-v=.5+.5*sin(q.x*u_freq*3.0+t);
-
-}
-
-
-/* WAVES */
-
-else if(u_style==2){
-
-v=
-.5+
-.5*sin(
-q.y*u_freq*5.0+
-sin(q.x*3.0+t)*u_warp+
-t
-);
-
-}
-
-
-/* RIBBONS */
-
-else if(u_style==3){
-
-q.y+=sin(q.x*8.0+t)*.35*u_warp;
-q.y+=sin(q.x*17.0-t)*.12*u_warp;
-
-v=.5+.5*sin(q.y*u_freq*4.0);
-
-}
-
-
-/* SMOKE */
-
-else if(u_style==4){
-
-v=fbm(q*u_freq*.8+vec2(t*.15,-t*.1));
-
-}
-
-
-/* CLOUDS */
-
-else if(u_style==5){
-
-v=fbm(q*u_freq*.55+vec2(t*.08,t*.04));
-
-}
-
-
-/* AURORA */
-
-else if(u_style==6){
-
-q.x+=sin(q.y*5.0-t)*u_warp;
-v=
-.5+
-.5*sin(
-q.x*u_freq*3.0+
-sin(q.y*3.0)*2.0
-);
-
-
-}
-
-
-/* PLASMA */
-
-else if(u_style==7){
-
-v=
-.5+
-.25*sin(q.x*u_freq*3.0+t)+
-.25*sin(q.y*u_freq*4.0-t)+
-.15*sin((q.x+q.y)*6.0+t);
-
-}
-
-
-/* NEBULA */
-
-else if(u_style==8){
-
-v=fbm(q*3.0*u_freq*.4+vec2(t*.06,-t*.08));
-
-}
-
-
-/* COSMIC */
-
-else if(u_style==9){
-
-float r=length(q);
-
-v=.5+.5*sin(r*u_freq*8.0-t);
-
-}
-
-
-/* VORTEX */
-
-else if(u_style==10){
-
-float r=length(q);
-
-float a=atan(q.y,q.x);
-
-v=.5+.5*sin(
-r*u_freq*8.0+
-a*5.0-
-t*1.4
-);
-
-}
-
-
-/* SPIRAL */
-
-else if(u_style==11){
-
-float r=length(q);
-float a=atan(q.y,q.x);
-
-v=.5+.5*sin(
-a*7.0+r*u_freq*9.0-t
-);
-
-}
-
-
-/* RINGS */
-
-else if(u_style==12){
-
-float r=length(q);
-
-v=.5+.5*sin(
-r*u_freq*12.0-t*1.2
-);
-
-}
-
-
-/* TUNNEL */
-
-else if(u_style==13){
-
-float r=max(length(q),.01);
-
-float a=atan(q.y,q.x);
-
-v=.5+.5*sin(
-a*8.0+
-log(r)*u_freq*5.0+
-t
-);
-
-}
-
-
-/* WARP SPACE */
-
-else if(u_style==14){
-
-q+=vec2(
-sin(q.y*5.0+t),
-cos(q.x*4.0-t)
-)*u_warp*.3;
-
-v=fbm(q*u_freq);
-
-}
-
-
-/* ORGANIC */
-
-else if(u_style==15){
-
-q+=vec2(
-sin(q.y*4.0+t),
-cos(q.x*3.0-t)
-)*u_warp*.35;
-
-v=fbm(q*u_freq);
-
-}
-
-
-/* MARBLE */
-
-else if(u_style==16){
-
-float n=fbm(q*3.0);
-
-v=.5+.5*sin(
-(q.x+n*4.0)*u_freq*4.0+t
-);
-
-}
-
-
-/* LAVA */
-
-else if(u_style==17){
-
-float n=fbm(q*2.5+vec2(t*.1));
-
-v=smoothstep(.25,.75,n);
-
-}
-
-
-/* WATER */
-
-else if(u_style==18){
-
-v=
-.5+
-.25*sin(q.x*7.0+t)+
-.25*sin(q.y*9.0-t*.7);
-
-}
-
-
-/* SAND */
-
-else if(u_style==19){
-
-v=fbm(q*u_freq*4.0+t*.03);
-
-}
-
-
-/* TOPOGRAPHIC */
-
-else if(u_style==20){
-
-float r=length(q);
-
-v=.5+.5*sin(
-r*u_freq*13.0-t*.4
-);
-
-}
-
-
-/* GRID */
-
-else if(u_style==21){
-
-float gx=abs(fract(q.x*u_freq*4.0)-.5);
-float gy=abs(fract(q.y*u_freq*4.0)-.5);
-
-v=1.0-smoothstep(
-.02,
-.15,
-min(gx,gy)
-);
-
-}
-
-
-/* LINES */
-
-else if(u_style==22){
-
-v=.5+.5*sin(
-(q.x+sin(q.y*3.0+t)*u_warp)
-*u_freq*12.0
-);
-
-}
-
-
-/* CELLS */
-
-else if(u_style==23){
-
-v=fbm(q*u_freq*2.0+t*.08);
-
-v=smoothstep(.25,.7,v);
-
-}
-
-
-/* NOISE */
-
-else{
-
-v=fbm(q*u_freq*3.0+vec2(t*.1));
-
-}
-
-return clamp(v,0.0,1.0);
-
-}
-
 
 void main(){
+    vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+    vec2 p=uv-0.5;
+    float aspect=u_resolution.x/u_resolution.y;
+    p.x*=aspect;
+    p=rot(p,u_rotation);
+    p*=u_scale;
 
-vec2 uv=gl_FragCoord.xy/u_resolution.xy;
+    float t=u_time;
+    p += vec2(sin(t*0.3),cos(t*0.23))*0.03*u_warp;
 
-vec2 p=uv-.5;
+    float v=pattern(p,t);
+    v=mix(v,smoothstep(0.0,1.0,v),u_softness);
 
-float aspect=u_resolution.x/u_resolution.y;
+    vec3 col=palette(v);
 
-p.x*=aspect;
+    col += smoothstep(0.35,0.8,v)*u_glow*0.15;
+    col *= u_brightness;
 
-p=rotate(p,u_rotation);
+    float lum=dot(col,vec3(0.299,0.587,0.114));
+    col=mix(vec3(lum),col,u_saturation);
+    col=(col-0.5)*u_contrast+0.5;
 
-p*=u_scale;
+    if(u_grain>0.0){
+        col += (hash(gl_FragCoord.xy+u_time*50.0)-0.5)*u_grain;
+    }
 
-float t=u_time;
+    float dist=length(uv-0.5)*1.414;
+    col *= 1.0-dist*u_vignette;
 
-
-/* subtle global movement */
-
-p+=vec2(
-sin(t*.3),
-cos(t*.23)
-)*.03*u_warp;
-
-
-float v=pattern(p,t);
-
-
-/* soften gradients */
-
-float soft=mix(
-1.0,
-smoothstep(0.0,1.0,v),
-u_softness
-);
-
-v=soft;
-
-
-vec3 col=palette(v);
-
-
-/* glow */
-
-float glow=smoothstep(.35,.8,v);
-
-col+=glow*u_glow*.15;
-
-
-/* brightness */
-
-col*=u_brightness;
-
-
-/* saturation */
-
-float lum=
-dot(
-col,
-vec3(.299,.587,.114)
-);
-
-col=mix(
-vec3(lum),
-col,
-u_saturation
-);
-
-
-/* contrast */
-
-col=(col-.5)*u_contrast+.5;
-
-
-/* grain */
-
-if(u_grain>0.0){
-
-float g=
-hash(gl_FragCoord.xy+u_time*50.0)-.5;
-
-col+=g*u_grain;
-
+    gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);
 }
-
-
-/* vignette */
-
-float dist=length(uv-.5)*1.414;
-
-col*=1.0-dist*u_vignette;
-
-
-/* output */
-
-gl_FragColor=vec4(
-clamp(col,0.0,1.0),
-1.0
-);
-
-}
-
 `;
-
 
 /* =========================
 SHADER COMPILATION
@@ -1147,6 +817,9 @@ throw new Error("WebGL program link failed");
 }
 
 gl.useProgram(program);
+
+gl.clearColor(0,0,0,1);
+gl.clear(gl.COLOR_BUFFER_BIT);
 
 
 /* =========================
@@ -1219,15 +892,12 @@ U[n]=gl.getUniformLocation(program,n);
 
 U.colors=[];
 
-for(let i=0;i<6;i++){
-
-U.colors.push(
-gl.getUniformLocation(
-program,
-"u_colors["+i+"]"
-)
-);
-
+for(let i=1;i<=6;i++){
+    U.colors.push({
+        r:gl.getUniformLocation(program,"u_c"+i+"r"),
+        g:gl.getUniformLocation(program,"u_c"+i+"g"),
+        b:gl.getUniformLocation(program,"u_c"+i+"b")
+    });
 }
 
 
@@ -1306,19 +976,25 @@ parseInt(hex.substring(5,7),16)/255
 
 function uploadColors(){
 
-for(let i=0;i<6;i++){
+    gl.useProgram(program);
 
-const rgb=hexRgb(
-document.getElementById(
-"c"+(i+1)
-).value
-);
+    for(let i=0;i<6;i++){
 
-gl.uniform3fv(
-U.colors[i],
-rgb
-);
+        const rgb=hexRgb(
+            document.getElementById("c"+(i+1)).value
+        );
 
+        const u=U.colors[i];
+
+        gl.uniform1f(u.r,rgb[0]);
+        gl.uniform1f(u.g,rgb[1]);
+        gl.uniform1f(u.b,rgb[2]);
+    }
+
+    gl.uniform1i(
+        U.colorCount,
+        Math.max(2,Math.min(6,state.colorCount))
+    );
 }
 
 gl.uniform1i(
@@ -1430,32 +1106,23 @@ let renderStart=performance.now();
 
 function render(now){
 
-if(playing){
+    if(playing){
 
-const seconds=
-(now-renderStart)/1000;
+        const seconds=(now-renderStart)/1000;
 
-updateUniforms(
-seconds*state.speed
-);
+        gl.useProgram(program);
+        gl.bindBuffer(gl.ARRAY_BUFFER,buffer);
+        gl.enableVertexAttribArray(position);
+        gl.vertexAttribPointer(position,2,gl.FLOAT,false,0,0);
 
-gl.viewport(
-0,
-0,
-canvas.width,
-canvas.height
-);
+        gl.viewport(0,0,canvas.width,canvas.height);
 
-gl.drawArrays(
-gl.TRIANGLES,
-0,
-6
-);
+        updateUniforms(seconds*state.speed);
 
-}
+        gl.drawArrays(gl.TRIANGLES,0,6);
+    }
 
-requestAnimationFrame(render);
-
+    requestAnimationFrame(render);
 }
 
 requestAnimationFrame(render);
@@ -1676,38 +1343,8 @@ uploadColors();
 PLAY / PAUSE
 ========================= */
 
-document.getElementById("pause")
-.addEventListener("click",()=>{
-
-playing=!playing;
-
-document.getElementById("pause")
-.textContent=
-playing
-?"Ⅱ Pause"
-:"▶ Resume";
-
-if(playing){
-
-renderStart=
-performance.now();
-
-}
-
-});
-
-
 document.getElementById("random")
-.addEventListener(
-"click",
-randomize
-);
-
-document.getElementById("randomBottom")
-.addEventListener(
-"click",
-randomize
-);
+.addEventListener("click",randomize);
 
 
 document.getElementById("applySeed")
