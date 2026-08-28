@@ -675,16 +675,14 @@ function render(){
 
 
 /* =========================
-   VIDEO EXPORT
-   Keeps the live preview at 1280×720.
-   Export uses a separate offscreen canvas at the requested resolution.
+   VIDEO EXPORT — REALTIME CANVAS CAPTURE
    ========================= */
 
 let exportRecorder = null;
 let exportStream = null;
-let exportTimer = null;
 let exportRunning = false;
 let exportChunks = [];
+let exportRAF = 0;
 
 function supportedMime(){
     const types = [
@@ -692,253 +690,709 @@ function supportedMime(){
         "video/webm;codecs=vp8",
         "video/webm"
     ];
-    for(const t of types){
-        if(window.MediaRecorder && MediaRecorder.isTypeSupported(t)) return t;
+
+    for(const type of types){
+        if(window.MediaRecorder &&
+           MediaRecorder.isTypeSupported(type)){
+            return type;
+        }
     }
+
     return "";
 }
 
-function downloadExport(blob, filename){
+function downloadVideo(blob, filename){
+
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = filename;
+
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),5000);
+
+    setTimeout(()=>{
+        URL.revokeObjectURL(url);
+    },5000);
 }
 
-function drawExportFrame(outCanvas, timeSeconds){
-    const outCtx = outCanvas.getContext("2d");
-    const w = outCanvas.width;
-    const h = outCanvas.height;
 
-    const oldW = canvas.width;
-    const oldH = canvas.height;
+/*
+    IMPORTANT:
+    The live renderer is the same renderer used for export.
 
-    // Render the same procedural design at the requested output size.
-    canvas.width = w;
-    canvas.height = h;
+    We temporarily resize the SAME canvas to the requested
+    output resolution, capture that canvas, and continuously
+    render animation frames into it while MediaRecorder records.
+*/
 
-    const now = performance.now();
-    const oldStart = startTime;
-    startTime = now - (timeSeconds / Math.max(params.speed,0.0001))*1000;
+function exportVideo(){
 
-    // One synchronous render pass into the working canvas.
-    const image = outCtx.createImageData(w,h);
-    const data = image.data;
-    const colors = getColors();
-    const aspect = w/h;
-    const style = params.style;
-    const time = timeSeconds * params.speed;
-    let p = 0;
+    if(exportRunning){
+        return;
+    }
+
+    if(!window.MediaRecorder ||
+       !HTMLCanvasElement.prototype.captureStream){
+
+        alert("Your browser does not support canvas video recording.");
+        return;
+    }
+
+    const mime=supportedMime();
+
+    if(!mime){
+
+        alert("WebM recording is not supported in this browser.");
+        return;
+    }
+
+    const resolution=
+        document.getElementById("exportResolution").value;
+
+    const fps=
+        parseInt(
+            document.getElementById("exportFps").value,
+            10
+        );
+
+    const duration=
+        parseInt(
+            document.getElementById("exportDuration").value,
+            10
+        );
+
+    const parts=
+        resolution.split("x").map(Number);
+
+    const outW=parts[0];
+    const outH=parts[1];
+
+    /*
+       Save the live preview state.
+    */
+
+    const oldW=canvas.width;
+    const oldH=canvas.height;
+
+    const oldPlaying=playing;
+    const oldStartTime=startTime;
+
+    /*
+       Set REAL recording resolution.
+    */
+
+    canvas.width=outW;
+    canvas.height=outH;
+
+    /*
+       Start animation from time zero.
+    */
+
+    playing=true;
+    startTime=performance.now();
+
+    /*
+       Draw an actual first frame BEFORE recording starts.
+    */
+
+    renderOneFrame(0);
+
+    /*
+       Capture the SAME canvas that is being rendered.
+    */
+
+    exportStream=
+        canvas.captureStream(fps);
+
+    exportChunks=[];
+    exportRunning=true;
+
+    const bitrate=
+        outW>=3840
+        ? 40000000
+        : 25000000;
+
+    exportRecorder=
+        new MediaRecorder(
+            exportStream,
+            {
+                mimeType:mime,
+                videoBitsPerSecond:bitrate
+            }
+        );
+
+    exportRecorder.ondataavailable=e=>{
+
+        if(e.data && e.data.size>0){
+            exportChunks.push(e.data);
+        }
+
+    };
+
+    exportRecorder.onerror=e=>{
+
+        console.error(
+            "Recorder error:",
+            e
+        );
+
+        finishExport(
+            oldW,
+            oldH,
+            oldPlaying,
+            oldStartTime,
+            false
+        );
+
+    };
+
+    exportRecorder.onstop=()=>{
+
+        const blob=
+            new Blob(
+                exportChunks,
+                {type:mime}
+            );
+
+        const filename=
+            `Gradient_${outW}x${outH}_${fps}fps_${duration}s.webm`;
+
+        downloadVideo(
+            blob,
+            filename
+        );
+
+        finishExport(
+            oldW,
+            oldH,
+            oldPlaying,
+            oldStartTime,
+            true
+        );
+
+    };
+
+    document.getElementById(
+        "exportStatus"
+    ).textContent=
+        `Recording ${outW}×${outH} • ${fps} FPS • ${duration}s...`;
+
+    document.getElementById(
+        "exportProgress"
+    ).style.width="0%";
+
+    /*
+       Start recording.
+
+       250ms chunks prevent the browser from waiting
+       until the very end before producing data.
+    */
+
+    exportRecorder.start(250);
+
+    const recordingStart=
+        performance.now();
+
+    /*
+       REALTIME rendering loop.
+
+       This is the important fix:
+       every animation frame is rendered into the
+       canvas while MediaRecorder is capturing it.
+    */
+
+    function recordFrame(now){
+
+        if(!exportRunning){
+            return;
+        }
+
+        const elapsed=
+            (now-recordingStart)/1000;
+
+        if(elapsed>=duration){
+
+            document.getElementById(
+                "exportProgress"
+            ).style.width="100%";
+
+            if(
+                exportRecorder &&
+                exportRecorder.state!=="inactive"
+            ){
+
+                exportRecorder.stop();
+
+            }
+
+            return;
+        }
+
+        /*
+           Render the current animation time.
+        */
+
+        renderOneFrame(
+            elapsed
+        );
+
+        const percent=
+            Math.min(
+                99,
+                elapsed/duration*100
+            );
+
+        document.getElementById(
+            "exportProgress"
+        ).style.width=
+            percent+"%";
+
+        exportRAF=
+            requestAnimationFrame(
+                recordFrame
+            );
+
+    }
+
+    exportRAF=
+        requestAnimationFrame(
+            recordFrame
+        );
+
+}
+
+
+/*
+    Draw exactly one frame using the ORIGINAL
+    2D renderer logic.
+*/
+
+function renderOneFrame(timeSeconds){
+
+    const w=canvas.width;
+    const h=canvas.height;
+
+    const image=
+        ctx.createImageData(w,h);
+
+    const data=image.data;
+
+    const colors=getColors();
+
+    const aspect=w/h;
+
+    const style=params.style;
+
+    let p=0;
+
+    /*
+       At 4K this is intentionally expensive,
+       but it gives the recorder real moving frames.
+    */
 
     for(let y=0;y<h;y++){
+
         const ny=(y/h-.5)*2;
+
         for(let x=0;x<w;x++){
-            const nx=((x/w-.5)*2)*aspect;
-            let xx=nx, yy=ny;
+
+            const nx=
+                ((x/w-.5)*2)*aspect;
+
+            let xx=nx;
+            let yy=ny;
+
             const d=params.distortion;
 
             if(style==="liquid"){
-                xx+=Math.sin(yy*3+time*1.2)*.35*d;
-                yy+=Math.sin(xx*2.5-time)*.25*d;
-            } else if(style==="silk"){
-                yy+=Math.sin(nx*4+time*1.4)*.35*d;
-                xx+=Math.sin(ny*2-time*.8)*.15*d;
-            } else if(style==="aurora"){
-                xx+=Math.sin(ny*5-time)*.3*d;
-                yy+=Math.sin(nx*2+time)*.15*d;
-            } else if(style==="vortex"){
-                const r=Math.sqrt(xx*xx+yy*yy);
-                const a=Math.atan2(yy,xx)+r*2*d+time*.5;
-                xx=Math.cos(a)*r; yy=Math.sin(a)*r;
-            } else if(style==="ribbon"){
-                yy+=Math.sin(nx*5+time*1.3)*.22*d;
-                yy+=Math.sin(nx*11-time)*.08*d;
-            } else if(style==="plasma"){
-                xx+=Math.sin(yy*7+time)*.15*d;
-                yy+=Math.cos(xx*6-time)*.15*d;
-            } else if(style==="organic"){
-                xx+=Math.sin(yy*3+time)*.25*d;
-                yy+=Math.cos(xx*3-time*.7)*.25*d;
-            } else if(style==="rings"){
-                const r=Math.sqrt(xx*xx+yy*yy);
-                const wave=Math.sin(r*8-time*1.5);
-                xx+=wave*.15*d; yy+=wave*.15*d;
-            } else if(style==="waves"){
-                yy+=Math.sin(nx*4+time)*.3*d;
-                yy+=Math.sin(nx*9-time*.5)*.1*d;
-            } else if(style==="cosmic"){
-                xx+=Math.sin(yy*8+time)*.12*d;
-                yy+=Math.cos(xx*7-time)*.12*d;
+
+                xx +=
+                    Math.sin(
+                        yy*3+
+                        timeSeconds*1.2
+                    )*.35*d;
+
+                yy +=
+                    Math.sin(
+                        xx*2.5-
+                        timeSeconds
+                    )*.25*d;
+
+            }
+
+            else if(style==="silk"){
+
+                yy +=
+                    Math.sin(
+                        nx*4+
+                        timeSeconds*1.4
+                    )*.35*d;
+
+                xx +=
+                    Math.sin(
+                        ny*2-
+                        timeSeconds*.8
+                    )*.15*d;
+
+            }
+
+            else if(style==="aurora"){
+
+                xx +=
+                    Math.sin(
+                        ny*5-
+                        timeSeconds
+                    )*.3*d;
+
+                yy +=
+                    Math.sin(
+                        nx*2+
+                        timeSeconds
+                    )*.15*d;
+
+            }
+
+            else if(style==="vortex"){
+
+                const r=
+                    Math.sqrt(
+                        xx*xx+
+                        yy*yy
+                    );
+
+                const a=
+                    Math.atan2(yy,xx)+
+                    r*2*d+
+                    timeSeconds*.5;
+
+                xx=Math.cos(a)*r;
+                yy=Math.sin(a)*r;
+
+            }
+
+            else if(style==="ribbon"){
+
+                yy +=
+                    Math.sin(
+                        nx*5+
+                        timeSeconds*1.3
+                    )*.22*d;
+
+                yy +=
+                    Math.sin(
+                        nx*11-
+                        timeSeconds
+                    )*.08*d;
+
+            }
+
+            else if(style==="plasma"){
+
+                xx +=
+                    Math.sin(
+                        yy*7+
+                        timeSeconds
+                    )*.15*d;
+
+                yy +=
+                    Math.cos(
+                        xx*6-
+                        timeSeconds
+                    )*.15*d;
+
+            }
+
+            else if(style==="organic"){
+
+                xx +=
+                    Math.sin(
+                        yy*3+
+                        timeSeconds
+                    )*.25*d;
+
+                yy +=
+                    Math.cos(
+                        xx*3-
+                        timeSeconds*.7
+                    )*.25*d;
+
+            }
+
+            else if(style==="rings"){
+
+                const r=
+                    Math.sqrt(
+                        xx*xx+
+                        yy*yy
+                    );
+
+                const wave=
+                    Math.sin(
+                        r*8-
+                        timeSeconds*1.5
+                    );
+
+                xx+=wave*.15*d;
+                yy+=wave*.15*d;
+
+            }
+
+            else if(style==="waves"){
+
+                yy +=
+                    Math.sin(
+                        nx*4+
+                        timeSeconds
+                    )*.3*d;
+
+                yy +=
+                    Math.sin(
+                        nx*9-
+                        timeSeconds*.5
+                    )*.1*d;
+
+            }
+
+            else if(style==="cosmic"){
+
+                xx +=
+                    Math.sin(
+                        yy*8+
+                        timeSeconds
+                    )*.12*d;
+
+                yy +=
+                    Math.cos(
+                        xx*7-
+                        timeSeconds
+                    )*.12*d;
+
             }
 
             xx*=params.scale;
             yy*=params.scale;
 
             let value;
+
             if(style==="vortex"){
-                value=.5+.5*Math.sin(Math.sqrt(xx*xx+yy*yy)*3-time);
-            } else if(style==="rings"){
-                value=.5+.5*Math.sin(Math.sqrt(xx*xx+yy*yy)*7-time*1.4);
-            } else {
-                value=.5+.25*Math.sin(xx*2.4+time)+.25*Math.cos(yy*2.1-time*.8);
+
+                value=
+                    .5+
+                    .5*Math.sin(
+                        Math.sqrt(
+                            xx*xx+
+                            yy*yy
+                        )*3-
+                        timeSeconds
+                    );
+
+            }
+
+            else if(style==="rings"){
+
+                value=
+                    .5+
+                    .5*Math.sin(
+                        Math.sqrt(
+                            xx*xx+
+                            yy*yy
+                        )*7-
+                        timeSeconds*1.4
+                    );
+
+            }
+
+            else{
+
+                value=
+                    .5+
+                    .25*Math.sin(
+                        xx*2.4+
+                        timeSeconds
+                    )+
+                    .25*Math.cos(
+                        yy*2.1-
+                        timeSeconds*.8
+                    );
+
             }
 
             value=clamp(value);
-            let rgb=palette(value,colors);
+
+            let rgb=
+                palette(
+                    value,
+                    colors
+                );
 
             rgb[0]*=params.brightness;
             rgb[1]*=params.brightness;
             rgb[2]*=params.brightness;
 
-            const lum=.299*rgb[0]+.587*rgb[1]+.114*rgb[2];
-            rgb[0]=lum+(rgb[0]-lum)*params.saturation;
-            rgb[1]=lum+(rgb[1]-lum)*params.saturation;
-            rgb[2]=lum+(rgb[2]-lum)*params.saturation;
+            const lum=
+                .299*rgb[0]+
+                .587*rgb[1]+
+                .114*rgb[2];
 
-            rgb[0]=(rgb[0]-.5)*params.contrast+.5;
-            rgb[1]=(rgb[1]-.5)*params.contrast+.5;
-            rgb[2]=(rgb[2]-.5)*params.contrast+.5;
+            rgb[0]=
+                lum+
+                (rgb[0]-lum)*
+                params.saturation;
+
+            rgb[1]=
+                lum+
+                (rgb[1]-lum)*
+                params.saturation;
+
+            rgb[2]=
+                lum+
+                (rgb[2]-lum)*
+                params.saturation;
+
+            rgb[0]=
+                (rgb[0]-.5)*
+                params.contrast+
+                .5;
+
+            rgb[1]=
+                (rgb[1]-.5)*
+                params.contrast+
+                .5;
+
+            rgb[2]=
+                (rgb[2]-.5)*
+                params.contrast+
+                .5;
 
             if(params.grain>0){
-                const g=(hash(x*.01+y*.02+time*10)-.5)*params.grain;
-                rgb[0]+=g; rgb[1]+=g; rgb[2]+=g;
+
+                const g=
+                    (
+                        hash(
+                            x*.01+
+                            y*.02+
+                            timeSeconds*10
+                        )-
+                        .5
+                    )*
+                    params.grain;
+
+                rgb[0]+=g;
+                rgb[1]+=g;
+                rgb[2]+=g;
+
             }
 
             data[p++]=clamp(rgb[0])*255;
             data[p++]=clamp(rgb[1])*255;
             data[p++]=clamp(rgb[2])*255;
             data[p++]=255;
+
         }
+
     }
 
-    outCtx.putImageData(image,0,0);
+    ctx.putImageData(
+        image,
+        0,
+        0
+    );
+
+}
+
+
+/*
+    Restore the live preview after export.
+*/
+
+function finishExport(
+    oldW,
+    oldH,
+    oldPlaying,
+    oldStartTime,
+    success
+){
+
+    if(exportRAF){
+        cancelAnimationFrame(exportRAF);
+        exportRAF=0;
+    }
+
+    if(exportStream){
+
+        exportStream
+            .getTracks()
+            .forEach(
+                track=>track.stop()
+            );
+
+    }
+
+    exportStream=null;
+    exportRecorder=null;
+    exportRunning=false;
 
     canvas.width=oldW;
     canvas.height=oldH;
-    startTime=oldStart;
+
+    playing=oldPlaying;
+    startTime=oldStartTime;
+
+    if(success){
+
+        document.getElementById(
+            "exportStatus"
+        ).textContent=
+            "Export complete — video downloaded.";
+
+        document.getElementById(
+            "exportProgress"
+        ).style.width="100%";
+
+    }
+
+    else{
+
+        document.getElementById(
+            "exportStatus"
+        ).textContent=
+            "Export stopped.";
+
+    }
+
 }
 
-async function exportVideo(){
-    if(exportRunning) return;
 
-    if(!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream){
-        alert("This browser does not support canvas video recording.");
-        return;
-    }
-
-    const [w,h]=document.getElementById("exportResolution").value.split("x").map(Number);
-    const fps=parseInt(document.getElementById("exportFps").value,10);
-    const duration=parseInt(document.getElementById("exportDuration").value,10);
-    const mime=supportedMime();
-
-    if(!mime){
-        alert("WebM recording is not supported in this browser.");
-        return;
-    }
-
-    const outCanvas=document.createElement("canvas");
-    outCanvas.width=w;
-    outCanvas.height=h;
-
-    const outCtx=outCanvas.getContext("2d",{alpha:false});
-    if(!outCtx){
-        alert("Could not create export canvas.");
-        return;
-    }
-
-    exportChunks=[];
-    exportRunning=true;
-
-    const status=document.getElementById("exportStatus");
-    const progress=document.getElementById("exportProgress");
-    status.textContent=`Exporting ${w}×${h} • ${fps} FPS • ${duration}s...`;
-    progress.style.width="0%";
-
-    // Seed the first frame so captureStream never starts blank.
-    drawExportFrame(outCanvas,0);
-
-    exportStream=outCanvas.captureStream(fps);
-
-    const bitrate = w>=3840 ? 35000000 : 25000000;
-
-    exportRecorder=new MediaRecorder(exportStream,{
-        mimeType:mime,
-        videoBitsPerSecond:bitrate
-    });
-
-    exportRecorder.ondataavailable=e=>{
-        if(e.data && e.data.size>0) exportChunks.push(e.data);
-    };
-
-    exportRecorder.onerror=e=>{
-        console.error(e);
-        status.textContent="Export error.";
-        exportRunning=false;
-        if(exportStream) exportStream.getTracks().forEach(t=>t.stop());
-    };
-
-    exportRecorder.onstop=()=>{
-        if(exportStream) exportStream.getTracks().forEach(t=>t.stop());
-
-        if(exportChunks.length){
-            const blob=new Blob(exportChunks,{type:mime});
-            const stamp=new Date().toISOString().replace(/[:.]/g,"-");
-            downloadExport(blob,`gradient_${w}x${h}_${fps}fps_${duration}s_${stamp}.webm`);
-            status.textContent="Export complete — video downloaded.";
-            progress.style.width="100%";
-        }else{
-            status.textContent="No video data was produced.";
-        }
-
-        exportRecorder=null;
-        exportStream=null;
-        exportTimer=null;
-        exportRunning=false;
-    };
-
-    exportRecorder.start(250);
-
-    const started=performance.now();
-
-    const tick=()=>{
-        if(!exportRunning) return;
-
-        const elapsed=(performance.now()-started)/1000;
-        if(elapsed>=duration){
-            progress.style.width="100%";
-            exportRecorder.stop();
-            return;
-        }
-
-        drawExportFrame(outCanvas,elapsed);
-        progress.style.width=Math.min(99,(elapsed/duration)*100)+"%";
-        exportTimer=requestAnimationFrame(tick);
-    };
-
-    tick();
-}
+/*
+    Stop button.
+*/
 
 function stopExport(){
-    if(!exportRunning) return;
 
-    if(exportTimer) cancelAnimationFrame(exportTimer);
-    exportTimer=null;
-
-    if(exportRecorder && exportRecorder.state!=="inactive"){
-        exportRecorder.stop();
-    }else{
-        exportRunning=false;
+    if(!exportRunning){
+        return;
     }
 
-    document.getElementById("exportStatus").textContent="Export stopped.";
-}
+    exportRunning=false;
 
-document.getElementById("exportBtn").addEventListener("click",exportVideo);
-document.getElementById("stopExportBtn").addEventListener("click",stopExport);
+    if(exportRAF){
+        cancelAnimationFrame(exportRAF);
+        exportRAF=0;
+    }
+
+    if(
+        exportRecorder &&
+        exportRecorder.state!=="inactive"
+    ){
+
+        exportRecorder.stop();
+
+    }
+
+}
 
 
 function randomHex(){
